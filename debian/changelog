@@ -1,3 +1,10 @@
+shibboleth-sp2 (2.1.dfsg1-1~bpo40+1) etch-backports; urgency=low
+
+  * Rebuild for etch-backports.
+  * (Build-)depend on libxerces27-dev, as libxerces-c2-dev is not in Etch.
+
+ -- Ferenc Wagner <wferi@niif.hu>  Tue, 16 Sep 2008 18:18:12 +0200
+
 shibboleth-sp2 (2.1.dfsg1-1) UNRELEASED; urgency=low
 
   [ Russ Allbery ]
