@@ -3,9 +3,8 @@ shibboleth-sp2 (2.0.dfsg1-4) UNRELEASED; urgency=low
   * Rename debian/shib.load to debian/shib2.load to avoid clashing with the
     libapache2-mod-shib package.  Otherwise its Apache config file breaks our
     module.
-  * Automatically enable the Apache module on installation.
 
- -- Ferenc Wagner <wferi@niif.hu>  Fri, 10 Oct 2008 01:29:18 +0200
+ -- Ferenc Wagner <wferi@niif.hu>  Thu, 09 Oct 2008 19:05:09 +0200
 
 shibboleth-sp2 (2.0.dfsg1-3) unstable; urgency=low
 
