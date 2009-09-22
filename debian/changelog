@@ -1,15 +1,3 @@
-shibboleth-sp2 (2.0.dfsg1-4+lenny1) UNRELEASED; urgency=low
-
-  * SECURITY: Shibboleth incorrectly matched certificate subject names
-    against trusted "key names" when they contained nul characters.  This
-    affects only deployments relying on the "PKIX" style of trust
-    validation, used in the absence of explicit certificate information in
-    the SAML metadata provided to the SP and reliance on certificate
-    authorities found in the <KeyAuthority> metadata extension element.
-    See <http://shibboleth.internet2.edu/secadv/secadv_20090817.txt>.
-
- -- Russ Allbery <rra@debian.org>  Thu, 17 Sep 2009 18:36:03 -0700
-
 shibboleth-sp2 (2.0.dfsg1-4) unstable; urgency=low
 
   [ Ferenc Wagner ]
