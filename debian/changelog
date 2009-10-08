@@ -1,3 +1,13 @@
+shibboleth-sp2 (2.0.dfsg1-4+lenny1) stable-security; urgency=high
+
+  * Non-maintainer upload.
+  * Rebuild against opensaml2 2.0-2+lenny1, which includes a fix for a security
+    vulnerability in a header that is included here.
+  * Run make install with NOKEYGEN=1 and stop rm-ing generated certificates.
+    Fixes FTBFS.
+
+ -- Faidon Liambotis <paravoid@debian.org>  Thu, 08 Oct 2009 12:07:32 +0000
+
 shibboleth-sp2 (2.0.dfsg1-4) unstable; urgency=low
 
   [ Ferenc Wagner ]
