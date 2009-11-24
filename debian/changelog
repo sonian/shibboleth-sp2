@@ -1,3 +1,9 @@
+shibboleth-sp2 (2.0.dfsg1-4+lenny2) stable-security; urgency=high
+
+  * SECURITY: Backport fix for CVE-2009-3300
+
+ -- Ferenc Wagner <wferi@niif.hu>  Tue, 24 Nov 2009 16:02:12 +0100
+
 shibboleth-sp2 (2.0.dfsg1-4+lenny1) stable-security; urgency=high
 
   * Non-maintainer upload.

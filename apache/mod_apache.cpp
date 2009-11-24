@@ -31,6 +31,7 @@
 # define _CRT_SECURE_NO_DEPRECATE 1
 #endif
 
+#include "cve2009-3300.h"
 #include <shibsp/AbstractSPRequest.h>
 #include <shibsp/AccessControl.h>
 #include <shibsp/exceptions.h>
@@ -490,6 +491,7 @@ public:
       m_req->content_type = ap_psprintf(m_req->pool, type);
   }
   void setResponseHeader(const char* name, const char* value) {
+   HTTPResponse_setResponseHeader(name, value);
 #ifdef SHIB_DEFERRED_HEADERS
    if (!m_rc)
       // this happens on subrequests
@@ -516,6 +518,7 @@ public:
     return DONE;
   }
   long sendRedirect(const char* url) {
+    HTTPResponse_sendRedirect(url);
     ap_table_set(m_req->headers_out, "Location", url);
     return REDIRECT;
   }

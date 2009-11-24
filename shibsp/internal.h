@@ -48,4 +48,6 @@
 using namespace xmltooling::logging;
 using namespace xercesc;
 
+#include "cve2009-3300.h"
+
 #endif /* __shibsp_internal_h__ */

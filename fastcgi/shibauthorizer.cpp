@@ -26,6 +26,7 @@
 #define _CRT_SECURE_NO_DEPRECATE 1
 #define _SCL_SECURE_NO_WARNINGS 1
 
+#include "cve2009-3300.h"
 #include <shibsp/AbstractSPRequest.h>
 #include <shibsp/SPConfig.h>
 #include <shibsp/ServiceProvider.h>
@@ -157,6 +158,7 @@ public:
         return "";
     }
     void setResponseHeader(const char* name, const char* value) {
+        HTTPResponse_setResponseHeader(name, value);
         // Set for later.
         if (value)
             m_response_headers.insert(make_pair(name,value));
@@ -193,6 +195,7 @@ public:
     }
 
     long sendRedirect(const char* url) {
+        HTTPResponse_sendRedirect(url);
         string hdr=string("Status: 302 Please Wait\r\nLocation: ") + url + "\r\n"
           "Content-Type: text/html\r\n"
           "Content-Length: 40\r\n"

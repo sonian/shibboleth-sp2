@@ -251,3 +251,45 @@ void SPConfig::term()
 #endif
     log.info("%s library shutdown complete", PACKAGE_STRING);
 }
+
+// Instead of http://svn.middleware.georgetown.edu/view/cpp-xmltooling?view=rev&revision=676
+static void HTTPResponse_sanitizeURL(const char* url)
+{
+    const char* ch;
+    const char* allowedSchemes[] = { "http", "https", NULL };
+
+    for (ch=url; *ch; ++ch) {
+        if (iscntrl(*ch))
+            throw IOException("URL contained a control character.");
+    }
+
+    ch = strchr(url, ':');
+    if (!ch)
+        throw IOException("URL is malformed.");
+    std::string s(url, ch - url);
+
+    for (const char **sch = allowedSchemes; *sch; sch++)
+        if (!strcasecmp(s.c_str(), *sch))
+            return;
+
+    throw IOException("URL contains invalid scheme ($1).", params(1, s.c_str()));
+}
+
+void shibsp::HTTPResponse_setResponseHeader(const char* name, const char* value)
+{
+    for (const char* ch=name; *ch; ++ch) {
+        if (iscntrl(*ch))
+            throw IOException("Response header name contained a control character.");
+    }
+
+    for (const char* ch=value; *ch; ++ch) {
+        if (iscntrl(*ch))
+            throw IOException("Value for response header ($1) contained a control character.", params(1,name));
+    }
+}
+
+long shibsp::HTTPResponse_sendRedirect(const char* url)
+{
+    HTTPResponse_sanitizeURL(url);
+    return HTTPResponse::XMLTOOLING_HTTP_STATUS_MOVED;
+}
