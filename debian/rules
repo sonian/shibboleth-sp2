@@ -124,7 +124,8 @@ binary-arch: install-stamp
 	dh_strip
 	dh_compress
 	dh_fixperms
-	DH_OPTIONS="" dh_makeshlibs -plibshibsp1
+	DH_OPTIONS="" dh_makeshlibs -plibshibsp1 \
+	    -V 'libshibsp1 (>= 2.0.dfsg1-4+lenny2)'
 	dh_installdeb
 	dh_shlibdeps
 	dh_gencontrol
