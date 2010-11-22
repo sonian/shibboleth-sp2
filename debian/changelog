@@ -1,15 +1,13 @@
-shibboleth-sp2 (2.3.1+dfsg-4) unstable; urgency=low
+shibboleth-sp2 (2.3.1+dfsg-3) unstable; urgency=low
 
+  [ Ferenc Wagner ]
   * Restart Apache from the postinst script if the shib2 module is enabled
     to avoid communication errors with the upgraded shibd.  (Closes: #602328)
 
- -- Ferenc Wagner <wferi@niif.hu>  Mon, 22 Nov 2010 19:30:50 +0100
-
-shibboleth-sp2 (2.3.1+dfsg-3) unstable; urgency=low
-
+  [ Faidon Liambotis ]
   * Add myself to Uploaders.
 
- -- Faidon Liambotis <paravoid@debian.org>  Fri, 15 Oct 2010 21:04:44 +0300
+ -- Ferenc Wagner <wferi@niif.hu>  Mon, 22 Nov 2010 22:17:57 +0100
 
 shibboleth-sp2 (2.3.1+dfsg-2) unstable; urgency=low
 
