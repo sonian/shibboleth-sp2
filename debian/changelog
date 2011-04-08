@@ -1,5 +1,7 @@
 shibboleth-sp2 (2.4.2+dfsg-2) UNRELEASED; urgency=low
 
+  * Remove ${shlibs:Depends} from libshibsp-dev, which doesn't contain any
+    binaries.
   * Update standards version to 3.9.2 (no changes required).
 
  -- Russ Allbery <rra@debian.org>  Fri, 08 Apr 2011 13:10:52 -0700
