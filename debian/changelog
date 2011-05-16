@@ -1,3 +1,9 @@
+shibboleth-sp2 (2.4.2+dfsg-3) UNRELEASED; urgency=low
+
+  * Include <cstddef> instead of <stddef.h>, following upstream.
+
+ -- Russ Allbery <rra@debian.org>  Mon, 16 May 2011 16:27:27 -0700
+
 shibboleth-sp2 (2.4.2+dfsg-2) unstable; urgency=low
 
   * Include stddef.h for offsetof in apache/mod_apache.cpp, fixing FTBFS
