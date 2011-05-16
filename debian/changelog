@@ -1,4 +1,4 @@
-shibboleth-sp2 (2.4.2+dfsg-2) UNRELEASED; urgency=low
+shibboleth-sp2 (2.4.2+dfsg-2) unstable; urgency=low
 
   * Include stddef.h for offsetof in apache/mod_apache.cpp, fixing FTBFS
     with g++ 4.6.  (Closes: #624877)
@@ -6,7 +6,7 @@ shibboleth-sp2 (2.4.2+dfsg-2) UNRELEASED; urgency=low
     binaries.
   * Update standards version to 3.9.2 (no changes required).
 
- -- Russ Allbery <rra@debian.org>  Fri, 08 Apr 2011 13:10:52 -0700
+ -- Russ Allbery <rra@debian.org>  Sun, 15 May 2011 20:07:24 -0700
 
 shibboleth-sp2 (2.4.2+dfsg-1) unstable; urgency=low
 
