@@ -72,13 +72,13 @@
 #include <apr_pools.h>
 #endif
 
+#include <cstddef>		// for offsetof()
 #include <set>
 #include <memory>
 #include <fstream>
 #include <sstream>
 #include <stdexcept>
 
-#include <stddef.h>		// for offsetof()
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>		// for getpid()
 #endif
