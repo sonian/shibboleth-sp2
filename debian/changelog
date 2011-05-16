@@ -1,5 +1,7 @@
 shibboleth-sp2 (2.4.2+dfsg-2) UNRELEASED; urgency=low
 
+  * Include stddef.h for offsetof in apache/mod_apache.cpp, fixing FTBFS
+    with g++ 4.6.  (Closes: #624877)
   * Remove ${shlibs:Depends} from libshibsp-dev, which doesn't contain any
     binaries.
   * Update standards version to 3.9.2 (no changes required).
