@@ -76,7 +76,6 @@
 #include <apr_pools.h>
 #endif
 
-#include <cstddef>		// for offsetof()
 #include <set>
 #include <memory>
 #include <fstream>
