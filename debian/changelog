@@ -1,6 +1,18 @@
 shibboleth-sp2 (2.4.3+dfsg-1) UNRELEASED; urgency=low
 
   * New upstream release.
+    - Expire redirects by default so that the browser doesn't cache them
+      (turn off with ShibExpireRedirects off)
+    - Make library init routines idempotent
+    - <SSO>SAML2</SSO> now enables ECP support
+    - Fix SELECT query in ODBC storage service plugin
+    - Fix metagen to only create PAOS ACS elements once
+    - Fix XML namespace in metagen-generated XML for HOSTS
+    - DiscoFeed with no metadata provider returns an empty feed instead of
+      throwing an exception
+    - Fix calculation of time interval when maxTimeSinceAuthn is used and
+      IdP time is ahead of SP time
+    - Improve the IdP example metadata
   * Include <cstddef> instead of <stddef.h>, following upstream.
   * Update debian/watch and debian/rules for the new upstream distribution
     location.
