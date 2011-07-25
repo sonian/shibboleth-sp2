@@ -13,7 +13,6 @@ shibboleth-sp2 (2.4.3+dfsg-1) UNRELEASED; urgency=low
     - Fix calculation of time interval when maxTimeSinceAuthn is used and
       IdP time is ahead of SP time
     - Improve the IdP example metadata
-  * Include <cstddef> instead of <stddef.h>, following upstream.
   * Update debian/watch and debian/rules for the new upstream distribution
     location.
 
