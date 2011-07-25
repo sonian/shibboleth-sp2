@@ -42,7 +42,7 @@ DIST_COMMON = $(attrfiltinclude_HEADERS) $(attrinclude_HEADERS) \
 	$(liteinclude_HEADERS) $(mdinclude_HEADERS) $(noinst_HEADERS) \
 	$(reminclude_HEADERS) $(secinclude_HEADERS) \
 	$(srcdir)/Makefile.am $(srcdir)/Makefile.in \
-	$(utilinclude_HEADERS)
+	$(srcdir)/config_pub.h.in $(utilinclude_HEADERS)
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/acinclude.m4 \
 	$(top_srcdir)/m4/acx_pthread.m4 $(top_srcdir)/m4/doxygen.m4 \
@@ -52,7 +52,7 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/acinclude.m4 \
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
-CONFIG_HEADER = $(top_builddir)/config.h
+CONFIG_HEADER = $(top_builddir)/config.h config_pub.h
 CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
@@ -418,6 +418,7 @@ libshibspinclude_HEADERS = \
 	AccessControl.h \
 	Application.h \
 	base.h \
+	config_pub.h \
 	exceptions.h \
 	paths.h \
 	GSSRequest.h \
@@ -607,9 +608,9 @@ libshibsp_la_SOURCES = \
 
 # this is different from the project version
 # http://sources.redhat.com/autobook/autobook/autobook_91.html
-libshibsp_la_LDFLAGS = -version-info 5:2:0
+libshibsp_la_LDFLAGS = -version-info 5:3:0
 libshibsp_la_LIBADD = $(XMLSEC_LIBS)
-libshibsp_lite_la_LDFLAGS = -version-info 5:2:0
+libshibsp_lite_la_LDFLAGS = -version-info 5:3:0
 libshibsp_lite_la_LIBADD = $(LITE_LIBS)
 libshibsp_lite_la_CPPFLAGS = -DSHIBSP_LITE
 pkgsysconfdir = $(sysconfdir)/@PACKAGE_NAME@
@@ -622,12 +623,14 @@ EXTRA_DIST = \
 	shibsp-lite.vcxproj \
 	shibsp.vcxproj.filters \
 	shibsp-lite.vcxproj.filters \
+	config_pub.h.in \
+    config_pub_win32.h\
 	paths.h.in \
 	resource.h \
 	shibsp.rc
 
 BUILT_SOURCES = paths.h
-all: $(BUILT_SOURCES)
+all: $(BUILT_SOURCES) config_pub.h
 	$(MAKE) $(AM_MAKEFLAGS) all-am
 
 .SUFFIXES:
@@ -662,6 +665,23 @@ $(top_srcdir)/configure:  $(am__configure_deps)
 $(ACLOCAL_M4):  $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(am__aclocal_m4_deps):
+
+config_pub.h: stamp-h2
+	@if test ! -f $@; then \
+	  rm -f stamp-h2; \
+	  $(MAKE) $(AM_MAKEFLAGS) stamp-h2; \
+	else :; fi
+
+stamp-h2: $(srcdir)/config_pub.h.in $(top_builddir)/config.status
+	@rm -f stamp-h2
+	cd $(top_builddir) && $(SHELL) ./config.status shibsp/config_pub.h
+$(srcdir)/config_pub.h.in:  $(am__configure_deps) 
+	($(am__cd) $(top_srcdir) && $(AUTOHEADER))
+	rm -f stamp-h2
+	touch $@
+
+distclean-hdr:
+	-rm -f config_pub.h stamp-h2
 install-libLTLIBRARIES: $(lib_LTLIBRARIES)
 	@$(NORMAL_INSTALL)
 	test -z "$(libdir)" || $(MKDIR_P) "$(DESTDIR)$(libdir)"
@@ -2174,11 +2194,11 @@ ID: $(HEADERS) $(SOURCES) $(LISP) $(TAGS_FILES)
 	mkid -fID $$unique
 tags: TAGS
 
-TAGS:  $(HEADERS) $(SOURCES)  $(TAGS_DEPENDENCIES) \
+TAGS:  $(HEADERS) $(SOURCES) config_pub.h.in $(TAGS_DEPENDENCIES) \
 		$(TAGS_FILES) $(LISP)
 	set x; \
 	here=`pwd`; \
-	list='$(SOURCES) $(HEADERS)  $(LISP) $(TAGS_FILES)'; \
+	list='$(SOURCES) $(HEADERS) config_pub.h.in $(LISP) $(TAGS_FILES)'; \
 	unique=`for i in $$list; do \
 	    if test -f "$$i"; then echo $$i; else echo $(srcdir)/$$i; fi; \
 	  done | \
@@ -2196,9 +2216,9 @@ TAGS:  $(HEADERS) $(SOURCES)  $(TAGS_DEPENDENCIES) \
 	  fi; \
 	fi
 ctags: CTAGS
-CTAGS:  $(HEADERS) $(SOURCES)  $(TAGS_DEPENDENCIES) \
+CTAGS:  $(HEADERS) $(SOURCES) config_pub.h.in $(TAGS_DEPENDENCIES) \
 		$(TAGS_FILES) $(LISP)
-	list='$(SOURCES) $(HEADERS)  $(LISP) $(TAGS_FILES)'; \
+	list='$(SOURCES) $(HEADERS) config_pub.h.in $(LISP) $(TAGS_FILES)'; \
 	unique=`for i in $$list; do \
 	    if test -f "$$i"; then echo $$i; else echo $(srcdir)/$$i; fi; \
 	  done | \
@@ -2249,7 +2269,7 @@ distdir: $(DISTFILES)
 check-am: all-am
 check: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) check-am
-all-am: Makefile $(LTLIBRARIES) $(HEADERS)
+all-am: Makefile $(LTLIBRARIES) $(HEADERS) config_pub.h
 installdirs:
 	for dir in "$(DESTDIR)$(libdir)" "$(DESTDIR)$(attrfiltincludedir)" "$(DESTDIR)$(attrincludedir)" "$(DESTDIR)$(attrresincludedir)" "$(DESTDIR)$(bindincludedir)" "$(DESTDIR)$(handincludedir)" "$(DESTDIR)$(libshibspincludedir)" "$(DESTDIR)$(liteincludedir)" "$(DESTDIR)$(mdincludedir)" "$(DESTDIR)$(remincludedir)" "$(DESTDIR)$(secincludedir)" "$(DESTDIR)$(utilincludedir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
@@ -2290,7 +2310,7 @@ distclean: distclean-am
 	-rm -rf ./$(DEPDIR)
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
-	distclean-tags
+	distclean-hdr distclean-tags
 
 dvi: dvi-am
 
@@ -2368,24 +2388,24 @@ uninstall-am: uninstall-attrfiltincludeHEADERS \
 
 .PHONY: CTAGS GTAGS all all-am check check-am clean clean-generic \
 	clean-libLTLIBRARIES clean-libtool ctags distclean \
-	distclean-compile distclean-generic distclean-libtool \
-	distclean-tags distdir dvi dvi-am html html-am info info-am \
-	install install-am install-attrfiltincludeHEADERS \
-	install-attrincludeHEADERS install-attrresincludeHEADERS \
-	install-bindincludeHEADERS install-data install-data-am \
-	install-dvi install-dvi-am install-exec install-exec-am \
-	install-exec-hook install-handincludeHEADERS install-html \
-	install-html-am install-info install-info-am \
-	install-libLTLIBRARIES install-libshibspincludeHEADERS \
-	install-liteincludeHEADERS install-man \
-	install-mdincludeHEADERS install-pdf install-pdf-am install-ps \
-	install-ps-am install-remincludeHEADERS \
-	install-secincludeHEADERS install-strip \
-	install-utilincludeHEADERS installcheck installcheck-am \
-	installdirs maintainer-clean maintainer-clean-generic \
-	mostlyclean mostlyclean-compile mostlyclean-generic \
-	mostlyclean-libtool pdf pdf-am ps ps-am tags uninstall \
-	uninstall-am uninstall-attrfiltincludeHEADERS \
+	distclean-compile distclean-generic distclean-hdr \
+	distclean-libtool distclean-tags distdir dvi dvi-am html \
+	html-am info info-am install install-am \
+	install-attrfiltincludeHEADERS install-attrincludeHEADERS \
+	install-attrresincludeHEADERS install-bindincludeHEADERS \
+	install-data install-data-am install-dvi install-dvi-am \
+	install-exec install-exec-am install-exec-hook \
+	install-handincludeHEADERS install-html install-html-am \
+	install-info install-info-am install-libLTLIBRARIES \
+	install-libshibspincludeHEADERS install-liteincludeHEADERS \
+	install-man install-mdincludeHEADERS install-pdf \
+	install-pdf-am install-ps install-ps-am \
+	install-remincludeHEADERS install-secincludeHEADERS \
+	install-strip install-utilincludeHEADERS installcheck \
+	installcheck-am installdirs maintainer-clean \
+	maintainer-clean-generic mostlyclean mostlyclean-compile \
+	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
+	tags uninstall uninstall-am uninstall-attrfiltincludeHEADERS \
 	uninstall-attrincludeHEADERS uninstall-attrresincludeHEADERS \
 	uninstall-bindincludeHEADERS uninstall-handincludeHEADERS \
 	uninstall-libLTLIBRARIES uninstall-libshibspincludeHEADERS \
