@@ -1,14 +1,15 @@
 Name:		@PACKAGE_NAME@
 Version:	@PACKAGE_VERSION@
 Release:	1
-Summary:    Open source system for attribute-based Web SSO
+Summary:	Open source system for attribute-based Web SSO
 Group:		Productivity/Networking/Security
-Vendor:     Internet2
+Vendor:		Internet2
 License:	Apache 2.0
 URL:		http://shibboleth.internet2.edu/
-Source:     %{name}-sp-%{version}.tar.gz
+Source:		%{name}-sp-%{version}.tar.gz
 BuildRoot:	%{_tmppath}/%{name}-%{version}-root
-PreReq:     openssl, xmltooling-schemas, opensaml-schemas
+Requires:	openssl
+PreReq:		xmltooling-schemas, opensaml-schemas
 %if 0%{?suse_version} > 1030 && 0%{?suse_version} < 1130
 PreReq:         %{insserv_prereq}
 BuildRequires:  libXerces-c-devel >= 2.8.0
@@ -20,6 +21,10 @@ BuildRequires:  libxmltooling-devel >= 1.4
 BuildRequires:  libsaml-devel >= 2.4
 %{?_with_log4cpp:BuildRequires: liblog4cpp-devel >= 1.0}
 %{!?_with_log4cpp:BuildRequires: liblog4shib-devel}
+%if 0%{?rhel} >= 6
+Requires: libcurl-openssl >= 7.21.7
+BuildRequires: chrpath
+%endif
 BuildRequires:  gcc-c++, zlib-devel
 %{!?_without_doxygen:BuildRequires: doxygen}
 %{!?_without_odbc:BuildRequires:unixODBC-devel}
@@ -81,6 +86,15 @@ This package includes files needed for development with Shibboleth.
 %if "%{_vendor}" == "suse"
 	%{__sed} -i "s/\/var\/log\/httpd/\/var\/log\/apache2/g" \
 		$RPM_BUILD_ROOT%{_sysconfdir}/%{name}/native.logger
+%endif
+%if 0%{?rhel} >= 6
+	%{__sed} -i "s/#_RHEL6_//g" \
+		$RPM_BUILD_ROOT%{_sysconfdir}/%{name}/shibd-redhat
+	%{__sed} -i "s/\/opt\/shibboleth\/lib/\/opt\/shibboleth\/%{_lib}/g" \
+		$RPM_BUILD_ROOT%{_sysconfdir}/%{name}/shibd-redhat
+	chrpath -d $RPM_BUILD_ROOT%{_sbindir}/shibd
+	chrpath -d $RPM_BUILD_ROOT%{_bindir}/mdquery
+	chrpath -d $RPM_BUILD_ROOT%{_bindir}/resolvertest
 %endif
 
 # Plug the SP into the built-in Apache on a recognized system.
@@ -201,7 +215,7 @@ cd /
 %dir %{_libdir}/%{name}
 %{_libdir}/%{name}/*
 %exclude %{_libdir}/%{name}/*.la
-%dir %{_localstatedir}/log/%{name}
+%attr(0750,root,root) %dir %{_localstatedir}/log/%{name}
 %dir %{_localstatedir}/run/%{name}
 %dir %{_datadir}/xml/%{name}
 %{_datadir}/xml/%{name}/*
@@ -218,8 +232,8 @@ cd /
 %{_sysconfdir}/%{name}/*.dist
 %{_sysconfdir}/%{name}/apache*.config
 %{_sysconfdir}/%{name}/shibd-*
-%attr(755, root, root) %{_sysconfdir}/%{name}/keygen.sh
-%attr(755, root, root) %{_sysconfdir}/%{name}/metagen.sh
+%attr(0755,root,root) %{_sysconfdir}/%{name}/keygen.sh
+%attr(0755,root,root) %{_sysconfdir}/%{name}/metagen.sh
 %{_sysconfdir}/%{name}/*.xsl
 %doc %{pkgdocdir}
 %exclude %{pkgdocdir}/api
@@ -232,6 +246,12 @@ cd /
 %doc %{pkgdocdir}/api
 
 %changelog
+* Sun Jun 26 2011  Scott Cantor  <cantor.2@osu.edu>  - 2.4.3-1
+- Log files shouldn't be world readable.
+- Explicit requirement for libcurl-openssl on RHEL6
+- Uncomment LD_LIBRARY_PATH in init script for RHEL6 
+- Remove rpath from binaries for RHEL6
+
 * Fri Dec 25 2009  Scott Cantor  <cantor.2@osu.edu>  - 2.4-1
 - Update dependencies.
 
