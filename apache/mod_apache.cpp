@@ -1,17 +1,21 @@
-/*
- *  Copyright 2001-2011 Internet2
+/**
+ * Licensed to the University Corporation for Advanced Internet
+ * Development, Inc. (UCAID) under one or more contributor license
+ * agreements. See the NOTICE file distributed with this work for
+ * additional information regarding copyright ownership.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * UCAID licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the
+ * License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied. See the License for the specific
+ * language governing permissions and limitations under the License.
  */
 
 /**
@@ -78,6 +82,7 @@
 #include <sstream>
 #include <stdexcept>
 
+#include <cstddef>
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>		// for getpid()
 #endif
@@ -168,6 +173,7 @@ struct shib_dir_config
     int bExportAssertion;   // export SAML assertion to the environment?
     int bUseEnvVars;        // use environment?
     int bUseHeaders;        // use headers?
+    int bExpireRedirects;   // expire redirects?
 };
 
 // creates per-directory config structure
@@ -188,6 +194,7 @@ extern "C" void* create_shib_dir_config (SH_AP_POOL* p, char* d)
     dc->bExportAssertion = -1;
     dc->bUseEnvVars = -1;
     dc->bUseHeaders = -1;
+    dc->bExpireRedirects = -1;
     return dc;
 }
 
@@ -252,6 +259,7 @@ extern "C" void* merge_shib_dir_config (SH_AP_POOL* p, void* base, void* sub)
     dc->bAuthoritative=((child->bAuthoritative==-1) ? parent->bAuthoritative : child->bAuthoritative);
     dc->bUseEnvVars=((child->bUseEnvVars==-1) ? parent->bUseEnvVars : child->bUseEnvVars);
     dc->bUseHeaders=((child->bUseHeaders==-1) ? parent->bUseHeaders : child->bUseHeaders);
+    dc->bExpireRedirects=((child->bExpireRedirects==-1) ? parent->bExpireRedirects : child->bExpireRedirects);
     return dc;
 }
 
@@ -311,7 +319,7 @@ extern "C" const char* shib_table_set(cmd_parms* parms, shib_dir_config* dc, con
 
 
 class ShibTargetApache : public AbstractSPRequest
-#if defined(HAVE_GSSAPI) && !defined(SHIB_APACHE_13)
+#if defined(SHIBSP_HAVE_GSSAPI) && !defined(SHIB_APACHE_13)
     , public GSSRequest
 #endif
 {
@@ -355,6 +363,9 @@ public:
 
   const char* getScheme() const {
     return m_sc->szScheme ? m_sc->szScheme : ap_http_method(m_req);
+  }
+  bool isSecure() const {
+      return HTTPRequest::isSecure();
   }
   const char* getHostname() const {
     return ap_get_server_name(m_req);
@@ -450,6 +461,12 @@ public:
     m_gotBody=true;
 #endif
     return m_body.c_str();
+  }
+  const char* getParameter(const char* name) const {
+      return AbstractSPRequest::getParameter(name);
+  }
+  vector<const char*>::size_type getParameters(const char* name, vector<const char*>& values) const {
+      return AbstractSPRequest::getParameters(name, values);
   }
   void clearHeader(const char* rawname, const char* cginame) {
     if (m_dc->bUseHeaders == 1) {
@@ -573,6 +590,10 @@ public:
   long sendRedirect(const char* url) {
     HTTPResponse::sendRedirect(url);
     ap_table_set(m_req->headers_out, "Location", url);
+    if (m_dc->bExpireRedirects != 0) {
+        ap_table_set(m_req->err_headers_out, "Expires", "Wed, 01 Jan 1997 12:00:00 GMT");
+        ap_table_set(m_req->err_headers_out, "Cache-Control", "private,no-store,no-cache,max-age=0");
+    }
     return REDIRECT;
   }
   const vector<string>& getClientCertificates() const {
@@ -591,7 +612,7 @@ public:
   }
   long returnDecline(void) { return DECLINED; }
   long returnOK(void) { return OK; }
-#if defined(HAVE_GSSAPI) && !defined(SHIB_APACHE_13)
+#if defined(SHIBSP_HAVE_GSSAPI) && !defined(SHIB_APACHE_13)
   gss_ctx_id_t getGSSContext() const {
     gss_ctx_id_t ctx = GSS_C_NO_CONTEXT;
     apr_pool_userdata_get((void**)&ctx, g_szGSSContextKey, m_req->pool);
@@ -919,7 +940,7 @@ void ApacheRequestMapper::getAll(map<string,const char*>& properties) const
         properties["exportAssertion"] = (sta->m_dc->bExportAssertion==1) ? "true" : "false";
 
     if (sta->m_dc->tSettings)
-        ap_table_do(_rm_get_all_table_walk, &properties, sta->m_dc->tSettings, nullptr);
+        ap_table_do(_rm_get_all_table_walk, &properties, sta->m_dc->tSettings, NULL);
 }
 
 const PropertySet* ApacheRequestMapper::getPropertySet(const char* name, const char* ns) const
@@ -1456,7 +1477,7 @@ static apr_status_t do_output_filter(ap_filter_t *f, apr_bucket_brigade *in)
         ap_log_rerror(APLOG_MARK,APLOG_DEBUG|APLOG_NOERRNO,SH_AP_R(r),"shib_out_filter: merging %d headers", apr_table_elts(rc->hdr_out)->nelts);
         // can't use overlap call because it will collapse Set-Cookie headers
         //apr_table_overlap(r->headers_out, rc->hdr_out, APR_OVERLAP_TABLES_MERGE);
-        apr_table_do(_table_add,r->headers_out, rc->hdr_out,nullptr);
+        apr_table_do(_table_add,r->headers_out, rc->hdr_out,NULL);
     }
 
     /* remove ourselves from the filter chain */
@@ -1475,7 +1496,7 @@ static apr_status_t do_error_filter(ap_filter_t *f, apr_bucket_brigade *in)
         ap_log_rerror(APLOG_MARK,APLOG_DEBUG|APLOG_NOERRNO,SH_AP_R(r),"shib_err_filter: merging %d headers", apr_table_elts(rc->hdr_out)->nelts);
         // can't use overlap call because it will collapse Set-Cookie headers
         //apr_table_overlap(r->err_headers_out, rc->hdr_out, APR_OVERLAP_TABLES_MERGE);
-        apr_table_do(_table_add,r->err_headers_out, rc->hdr_out,nullptr);
+        apr_table_do(_table_add,r->err_headers_out, rc->hdr_out,NULL);
     }
 
     /* remove ourselves from the filter chain */
@@ -1547,6 +1568,9 @@ static command_rec shire_cmds[] = {
   {"ShibUseHeaders", (config_fn_t)ap_set_flag_slot,
    (void *) XtOffsetOf (shib_dir_config, bUseHeaders),
    OR_AUTHCFG, FLAG, "Export attributes using custom HTTP headers"},
+  {"ShibExpireRedirects", (config_fn_t)ap_set_flag_slot,
+   (void *) XtOffsetOf (shib_dir_config, bExpireRedirects),
+   OR_AUTHCFG, FLAG, "Expire SP-generated redirects"},
 
   {nullptr}
 };
@@ -1666,6 +1690,9 @@ static command_rec shib_cmds[] = {
     AP_INIT_FLAG("ShibUseHeaders", (config_fn_t)ap_set_flag_slot,
         (void *) offsetof (shib_dir_config, bUseHeaders),
         OR_AUTHCFG, "Export attributes using custom HTTP headers"),
+    AP_INIT_FLAG("ShibExpireRedirects", (config_fn_t)ap_set_flag_slot,
+        (void *) offsetof (shib_dir_config, bExpireRedirects),
+        OR_AUTHCFG, "Expire SP-generated redirects"),
 
     {nullptr}
 };
