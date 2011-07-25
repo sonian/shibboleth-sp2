@@ -1,4 +1,4 @@
 version=3
 opts=dversionmangle=s/\+dfsg\d*$// \
-    http://shibboleth.internet2.edu/downloads/shibboleth/cppsp/latest/ \
+    http://www.shibboleth.net/downloads/service-provider/latest/ \
     shibboleth-sp-([\d.]+)\.tar\.gz

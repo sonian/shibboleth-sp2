@@ -1,6 +1,8 @@
 shibboleth-sp2 (2.4.2+dfsg-3) UNRELEASED; urgency=low
 
   * Include <cstddef> instead of <stddef.h>, following upstream.
+  * Update debian/watch and debian/rules for the new upstream distribution
+    location.
 
  -- Russ Allbery <rra@debian.org>  Mon, 16 May 2011 16:27:27 -0700
 

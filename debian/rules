@@ -12,7 +12,7 @@ endif
 DEBVERS := $(shell dpkg-parsechangelog | grep ^Version: | cut -d' ' -f2 \
 		| cut -d- -f1)
 VERSION := $(shell echo '$(DEBVERS)' | sed -e 's/[+-].*//' -e 's/~//g')
-URL      = http://shibboleth.internet2.edu/downloads/shibboleth/cppsp
+URL      = http://www.shibboleth.net/downloads/service-provider/
 
 # Download the upstream source and do the repackaging that we have to do for
 # DFSG reasons.  Depends on wget.
