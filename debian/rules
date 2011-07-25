@@ -83,7 +83,7 @@ override_dh_installdocs:
 	fi
 
 override_dh_installinit:
-	dh_installinit --name=shibd
+	dh_installinit --name=shibd -- start 20 2 3 4 5 . stop 20 .
 
 override_dh_makeshlibs:
 	dh_makeshlibs -Xusr/lib/shibboleth
