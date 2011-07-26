@@ -1,4 +1,4 @@
-shibboleth-sp2 (2.4.3+dfsg-1) UNRELEASED; urgency=low
+shibboleth-sp2 (2.4.3+dfsg-1) unstable; urgency=low
 
   * New upstream release.
     - Expire redirects by default so that the browser doesn't cache them
@@ -19,7 +19,7 @@ shibboleth-sp2 (2.4.3+dfsg-1) UNRELEASED; urgency=low
   * Update debian/watch and debian/rules for the new upstream distribution
     location.
 
- -- Russ Allbery <rra@debian.org>  Mon, 16 May 2011 16:27:27 -0700
+ -- Russ Allbery <rra@debian.org>  Mon, 25 Jul 2011 17:27:23 -0700
 
 shibboleth-sp2 (2.4.2+dfsg-2) unstable; urgency=low
 
