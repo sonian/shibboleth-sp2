@@ -1,3 +1,9 @@
+shibboleth-sp2 (2.4.3+dfsg-2) UNRELEASED; urgency=low
+
+  * Update the upstream download location in debian/copyright.
+
+ -- Russ Allbery <rra@debian.org>  Tue, 26 Jul 2011 18:22:28 -0700
+
 shibboleth-sp2 (2.4.3+dfsg-1) unstable; urgency=low
 
   * New upstream release.

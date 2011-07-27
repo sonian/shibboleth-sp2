@@ -1,6 +1,6 @@
 Format-Specification:
  http://svn.debian.org/wsvn/dep/web/deps/dep5.mdwn?op=file&rev=166
-Source: http://shibboleth.internet2.edu/downloads/shibboleth/cppsp/latest/
+Source: http://www.shibboleth.net/downloads/service-provider/
 Comment: The original upstream source was repackaged to remove the
  WS-Trust.xsd schema, which was not distributed under a DFSG-free
  license.
