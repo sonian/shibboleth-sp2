@@ -7,8 +7,9 @@ shibboleth-sp2 (2.4.3+dfsg-2) unstable; urgency=low
     current log4cpp does indeed do the facility shift.  Thanks to Jeremy
     Maryott for the report.  (Closes: #638594)
   * Update the upstream download location in debian/copyright.
+  * Fix some formatting issues in debian/copyright caught by Lintian.
 
- -- Russ Allbery <rra@debian.org>  Sun, 25 Sep 2011 14:33:49 -0700
+ -- Russ Allbery <rra@debian.org>  Sun, 25 Sep 2011 14:44:15 -0700
 
 shibboleth-sp2 (2.4.3+dfsg-1) unstable; urgency=low
 
