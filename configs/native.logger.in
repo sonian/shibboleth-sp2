@@ -44,11 +44,11 @@ log4j.category.XMLTooling.libcurl=INFO
 #log4j.appender.warn_log.threshold=WARN
 
 # Use syslog instead, since then at least the messages will go somewhere.
-# That facility is (3 << 3) or LOG_DAEMON, since log4cpp apparently
-# doesn't recognize symbolic log facilities.
+# That facility is LOG_DAEMON, since log4cpp apparently doesn't recognize
+# symbolic log facilities.
 #
 # This is a Debian-specific change.
 log4j.appender.native_log=org.apache.log4j.LocalSyslogAppender
 log4j.appender.native_log.syslogName=shibboleth-sp
-log4j.appender.native_log.facility=24
+log4j.appender.native_log.facility=3
 log4j.appender.native_log.layout=org.apache.log4j.BasicLayout

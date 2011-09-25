@@ -3,9 +3,12 @@ shibboleth-sp2 (2.4.3+dfsg-2) UNRELEASED; urgency=low
   * Build-depend on g++-4.4 on armel and build with that compiler since
     g++ 4.5 and 4.6 die with an internal compiler error even with no
     optimization.  Patch from Peter Green.  (Closes: #623263)
+  * Change the default native.logger facility to 3 from 3 << 3, since the
+    current log4cpp does indeed do the facility shift.  Thanks to Jeremy
+    Maryott for the report.  (Closes: #638594)
   * Update the upstream download location in debian/copyright.
 
- -- Russ Allbery <rra@debian.org>  Tue, 26 Jul 2011 18:22:28 -0700
+ -- Russ Allbery <rra@debian.org>  Sun, 25 Sep 2011 14:32:36 -0700
 
 shibboleth-sp2 (2.4.3+dfsg-1) unstable; urgency=low
 
