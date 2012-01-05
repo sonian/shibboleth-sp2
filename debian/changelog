@@ -1,3 +1,11 @@
+shibboleth-sp2 (2.4.3+dfsg-3) unstable; urgency=low
+
+  * Remove the armel build dependency on g++-4.4 and the code in
+    debian/rules to use it, since the g++ bug has been fixed.
+    (Closes: #654745)
+
+ -- Russ Allbery <rra@debian.org>  Thu, 05 Jan 2012 10:18:47 -0800
+
 shibboleth-sp2 (2.4.3+dfsg-2) unstable; urgency=low
 
   * Build-depend on g++-4.4 on armel and build with that compiler since

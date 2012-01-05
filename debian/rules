@@ -1,12 +1,5 @@
 #!/usr/bin/make -f
 
-# g++ 4.5 and 4.6 fail to build this package on armel with an internal
-# error: internal compiler error: in expand_expr_real_1, at expr.c:8532
-DEB_BUILD_ARCH := $(shell dpkg-architecture -qDEB_BUILD_ARCH)
-ifeq ($(DEB_BUILD_ARCH),armel)
-    export CXX=g++-4.4
-endif
-
 DOCS = debian/libshibsp-doc/usr/share/doc/libshibsp-doc
 
 ifneq (,$(findstring noopt,$(DEB_BUILD_OPTIONS)))
