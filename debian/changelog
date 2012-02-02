@@ -3,6 +3,8 @@ shibboleth-sp2 (2.4.3+dfsg-4) UNRELEASED; urgency=low
   * Update to debhelper compatibility level V9.
     - Enable hardening build flags.  (Closes: #656006)
     - Enable multiarch support.
+  * Tighten shlibs for libshibsp5 since the plugin directory changed due
+    to multiarch.
   * Rebuild the Autotools build system using dh-autoreconf instead of
     rolling our own version of the same thing.
   * Rewrite the shibd init script to use the LSB init script functions and

@@ -93,7 +93,8 @@ override_dh_installinit:
 	dh_installinit --name=shibd -- start 20 2 3 4 5 . stop 20 .
 
 override_dh_makeshlibs:
-	dh_makeshlibs -Xusr/lib/$(DEB_HOST_MULTIARCH)/shibboleth
+	dh_makeshlibs -V'libshibsp5 (>= 2.4.3+dfsg-4~)' \
+	    -Xusr/lib/$(DEB_HOST_MULTIARCH)/shibboleth
 
 %:
 	dh $@ --with autoreconf
