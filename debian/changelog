@@ -3,6 +3,8 @@ shibboleth-sp2 (2.4.3+dfsg-4) UNRELEASED; urgency=low
   * Update to debhelper compatibility level V9.
     - Enable hardening build flags.  (Closes: #656006)
     - Enable multiarch support.
+  * Rebuild the Autotools build system using dh-autoreconf instead of
+    rolling our own version of the same thing.
 
  -- Russ Allbery <rra@debian.org>  Wed, 01 Feb 2012 22:27:55 -0800
 

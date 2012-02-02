@@ -31,15 +31,10 @@ get-orig-source:
 	gzip -9 shibboleth-sp2_$(DEBVERS).orig.tar
 
 override_dh_auto_configure:
-	autoreconf -f -i
 	dh_auto_configure -- --libexecdir=/usr/lib/shibboleth \
 	    --localstatedir=/var --enable-apache-22 \
 	    --with-apxs2=/usr/bin/apxs2 --disable-dependency-tracking \
 	    --with-memcached $(SYSTEM)
-
-override_dh_auto_clean:
-	dh_auto_clean
-	find . -name Makefile.in -print0 | xargs -0r rm
 
 override_dh_auto_install:
 	NOKEYGEN=1 dh_auto_install
@@ -92,4 +87,4 @@ override_dh_makeshlibs:
 	dh_makeshlibs -Xusr/lib/shibboleth
 
 %:
-	dh $@
+	dh $@ --with autoreconf
