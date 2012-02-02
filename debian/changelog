@@ -1,4 +1,4 @@
-shibboleth-sp2 (2.4.3+dfsg-4) UNRELEASED; urgency=low
+shibboleth-sp2 (2.4.3+dfsg-4) unstable; urgency=low
 
   * Update to debhelper compatibility level V9.
     - Enable hardening build flags.  (Closes: #656006)
@@ -10,7 +10,7 @@ shibboleth-sp2 (2.4.3+dfsg-4) UNRELEASED; urgency=low
   * Rewrite the shibd init script to use the LSB init script functions and
     implement the status action.
 
- -- Russ Allbery <rra@debian.org>  Wed, 01 Feb 2012 22:27:55 -0800
+ -- Russ Allbery <rra@debian.org>  Thu, 02 Feb 2012 00:05:55 -0800
 
 shibboleth-sp2 (2.4.3+dfsg-3) unstable; urgency=low
 
