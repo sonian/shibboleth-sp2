@@ -3,6 +3,9 @@
 # Enable compiler hardening flags.
 export DEB_BUILD_MAINT_OPTIONS = hardening=+bindnow
 
+# Add --as-needed to drop a few unnecessary dependencies.
+export DEB_LDFLAGS_MAINT_APPEND = -Wl,--as-needed
+
 DEB_HOST_MULTIARCH ?= $(shell dpkg-architecture -qDEB_HOST_MULTIARCH)
 
 DOCS = debian/libshibsp-doc/usr/share/doc/libshibsp-doc
@@ -31,6 +34,9 @@ get-orig-source:
 	    shibboleth-sp2_$(DEBVERS).orig
 	rm -rf shibboleth-sp2_$(DEBVERS).orig
 	gzip -9 shibboleth-sp2_$(DEBVERS).orig.tar
+
+override_dh_autoreconf:
+	dh_autoreconf --as-needed
 
 override_dh_auto_configure:
 	dh_auto_configure -- \
