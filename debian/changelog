@@ -1,3 +1,11 @@
+shibboleth-sp2 (2.4.3+dfsg-4) UNRELEASED; urgency=low
+
+  * Update to debhelper compatibility level V9.
+    - Enable hardening build flags.  (Closes: #656006)
+    - Enable multiarch support.
+
+ -- Russ Allbery <rra@debian.org>  Wed, 01 Feb 2012 22:27:55 -0800
+
 shibboleth-sp2 (2.4.3+dfsg-3) unstable; urgency=low
 
   * Remove the armel build dependency on g++-4.4 and the code in

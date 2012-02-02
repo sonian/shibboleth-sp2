@@ -4,7 +4,7 @@ Priority: extra
 Maintainer: Debian Shib Team <pkg-shibboleth-devel@lists.alioth.debian.org>
 Uploaders: Russ Allbery <rra@debian.org>, Ferenc Wagner <wferi@niif.hu>,
  Faidon Liambotis <paravoid@debian.org>
-Build-Depends: debhelper (>= 8), apache2-threaded-dev, autoconf, automake,
+Build-Depends: debhelper (>= 9), apache2-threaded-dev, autoconf, automake,
  autotools-dev, doxygen, graphviz, liblog4cpp5-dev, libmemcached-dev,
  libsaml2-dev (>= 2.4), libssl-dev, libtool, libxerces-c-dev,
  libxml-security-c-dev (>= 1.6), libxmltooling-dev (>= 1.4),
@@ -35,6 +35,7 @@ Description: Federated web single sign-on system (Apache module)
 Package: libshibsp5
 Section: libs
 Architecture: any
+Multi-Arch: same
 Depends: ${shlibs:Depends}, ${misc:Depends}, opensaml2-schemas (>= 2.4),
  shibboleth-sp2-schemas (>= 2.4), xmltooling-schemas (>= 1.4)
 Description: Federated web single sign-on system (runtime)

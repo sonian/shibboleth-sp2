@@ -1,5 +1,8 @@
 #!/usr/bin/make -f
 
+# Enable compiler hardening flags.
+export DEB_BUILD_MAINT_OPTIONS = hardening=+bindnow
+
 DOCS = debian/libshibsp-doc/usr/share/doc/libshibsp-doc
 
 ifneq (,$(findstring noopt,$(DEB_BUILD_OPTIONS)))
