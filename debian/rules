@@ -3,6 +3,8 @@
 # Enable compiler hardening flags.
 export DEB_BUILD_MAINT_OPTIONS = hardening=+bindnow
 
+DEB_HOST_MULTIARCH ?= $(shell dpkg-architecture -qDEB_HOST_MULTIARCH)
+
 DOCS = debian/libshibsp-doc/usr/share/doc/libshibsp-doc
 
 ifneq (,$(findstring noopt,$(DEB_BUILD_OPTIONS)))
@@ -31,14 +33,15 @@ get-orig-source:
 	gzip -9 shibboleth-sp2_$(DEBVERS).orig.tar
 
 override_dh_auto_configure:
-	dh_auto_configure -- --libexecdir=/usr/lib/shibboleth \
+	dh_auto_configure -- \
+	    --libexecdir=/usr/lib/$(DEB_HOST_MULTIARCH)/shibboleth \
 	    --localstatedir=/var --enable-apache-22 \
 	    --with-apxs2=/usr/bin/apxs2 --disable-dependency-tracking \
 	    --with-memcached $(SYSTEM)
 
 override_dh_auto_install:
 	NOKEYGEN=1 dh_auto_install
-	rm debian/tmp/usr/lib/shibboleth/*.la
+	rm debian/tmp/usr/lib/*/shibboleth/*.la
 	rm -r debian/tmp/usr/share/doc/shibboleth*
 	rm -r debian/tmp/var/run
 	rm debian/tmp/etc/shibboleth/*.dist
@@ -53,7 +56,7 @@ override_dh_auto_install:
 	    debian/libapache2-mod-shib2.shibd.init
 
 override_dh_install:
-	mv debian/tmp/usr/lib/shibboleth/mod_shib_22.so \
+	mv debian/tmp/usr/lib/*/shibboleth/mod_shib_22.so \
 	    debian/libapache2-mod-shib2/usr/lib/apache2/modules
 	pod2man debian/man-pages/mdquery.pod --section 1 \
 	    --center 'Shibboleth' --release $(VERSION) \
@@ -84,7 +87,7 @@ override_dh_installinit:
 	dh_installinit --name=shibd -- start 20 2 3 4 5 . stop 20 .
 
 override_dh_makeshlibs:
-	dh_makeshlibs -Xusr/lib/shibboleth
+	dh_makeshlibs -Xusr/lib/$(DEB_HOST_MULTIARCH)/shibboleth
 
 %:
 	dh $@ --with autoreconf

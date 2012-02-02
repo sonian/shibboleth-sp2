@@ -1,7 +1,7 @@
-debian/tmp/usr/bin
-debian/tmp/usr/sbin
-debian/tmp/etc/shibboleth
-debian/tmp/usr/lib/shibboleth
+usr/bin
+usr/sbin
+etc/shibboleth
+usr/lib/*/shibboleth
 
 debian/shib2.load	etc/apache2/mods-available
 
