@@ -1,3 +1,9 @@
+shibboleth-sp2 (2.4.3+dfsg-5) UNRELEASED; urgency=low
+
+  * Add PIE to the hardening flags for the shibd binary.
+
+ -- Russ Allbery <rra@debian.org>  Thu, 02 Feb 2012 16:32:00 -0800
+
 shibboleth-sp2 (2.4.3+dfsg-4) unstable; urgency=low
 
   * Update to debhelper compatibility level V9.
