@@ -5,6 +5,9 @@ shibboleth-sp2 (2.4.3+dfsg-5) UNRELEASED; urgency=low
     the memcached_st struct, since the latter was removed in 1.0.  Thanks
     to Michael Fladischer for the patch.  Bump Build-Depends to require
     1.0 or later of libmemcached-dev.  (Closes: #658408)
+  * Move single-debian-patch to local-options and patch-header to
+    local-patch-header so that they only apply to the packages the team
+    builds, and NMUs get regular version-numbered patches.
 
  -- Russ Allbery <rra@debian.org>  Thu, 02 Feb 2012 16:32:00 -0800
 
