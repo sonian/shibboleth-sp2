@@ -308,7 +308,7 @@ bool MemcacheBase::deleteMemcache(const char *key,
     success = false;
   } else if (rv == MEMCACHED_ERRNO) {
     // System error
-    string error = string("Memcache::deleteMemcache() SYSTEM ERROR: ") + string(strerror(memc->cached_errno));
+    string error = string("Memcache::deleteMemcache() SYSTEM ERROR: ") + string(memcached_last_error_message(memc));
     log.error(error);
     throw IOException(error);
   } else {
@@ -349,7 +349,7 @@ bool MemcacheBase::getMemcache(const char *key,
     success = false;
   } else if (rv == MEMCACHED_ERRNO) {
     // System error
-    string error = string("Memcache::getMemcache() SYSTEM ERROR: ") + string(strerror(memc->cached_errno));
+    string error = string("Memcache::getMemcache() SYSTEM ERROR: ") + string(memcached_last_error_message(memc));
     log.error(error);
     throw IOException(error);
   } else {
@@ -388,7 +388,7 @@ bool MemcacheBase::addMemcache(const char *key,
     success = false;
   } else if (rv == MEMCACHED_ERRNO) {
     // System error
-    string error = string("Memcache::addMemcache() SYSTEM ERROR: ") + string(strerror(memc->cached_errno));
+    string error = string("Memcache::addMemcache() SYSTEM ERROR: ") + string(memcached_last_error_message(memc));
     log.error(error);
     throw IOException(error);
   } else {
@@ -424,7 +424,7 @@ bool MemcacheBase::setMemcache(const char *key,
     success = true;
   } else if (rv == MEMCACHED_ERRNO) {
     // System error
-    string error = string("Memcache::setMemcache() SYSTEM ERROR: ") + string(strerror(memc->cached_errno));
+    string error = string("Memcache::setMemcache() SYSTEM ERROR: ") + string(memcached_last_error_message(memc));
     log.error(error);
     throw IOException(error);
   } else {
@@ -463,7 +463,7 @@ bool MemcacheBase::replaceMemcache(const char *key,
     success = false;
   } else if (rv == MEMCACHED_ERRNO) {
     // System error
-    string error = string("Memcache::replaceMemcache() SYSTEM ERROR: ") + string(strerror(memc->cached_errno));
+    string error = string("Memcache::replaceMemcache() SYSTEM ERROR: ") + string(memcached_last_error_message(memc));
     log.error(error);
     throw IOException(error);
   } else {

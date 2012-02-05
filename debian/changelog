@@ -1,6 +1,10 @@
 shibboleth-sp2 (2.4.3+dfsg-5) UNRELEASED; urgency=low
 
   * Add PIE to the hardening flags for the shibd binary.
+  * Use memcached_last_error_message instead of the cached_errno member of
+    the memcached_st struct, since the latter was removed in 1.0.  Thanks
+    to Michael Fladischer for the patch.  Bump Build-Depends to require
+    1.0 or later of libmemcached-dev.  (Closes: #658408)
 
  -- Russ Allbery <rra@debian.org>  Thu, 02 Feb 2012 16:32:00 -0800
 
