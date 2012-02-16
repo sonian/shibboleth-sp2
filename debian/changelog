@@ -1,5 +1,9 @@
 shibboleth-sp2 (2.4.3+dfsg-5) UNRELEASED; urgency=low
 
+  * Fix syntax error in the update-rc.d invocation for shibd, which was
+    not visible on most Debian systems because of dependency-based boot.
+    Thanks to Evan Broder and Steve Langasek for pointing me in the right
+    direction.  (LP: #884402)
   * Add PIE to the hardening flags for the shibd binary.
   * Use memcached_last_error_message instead of the cached_errno member of
     the memcached_st struct, since the latter was removed in 1.0.  Thanks
