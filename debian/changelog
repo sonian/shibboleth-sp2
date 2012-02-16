@@ -1,4 +1,4 @@
-shibboleth-sp2 (2.4.3+dfsg-5) UNRELEASED; urgency=low
+shibboleth-sp2 (2.4.3+dfsg-5) unstable; urgency=low
 
   * Fix syntax error in the update-rc.d invocation for shibd, which was
     not visible on most Debian systems because of dependency-based boot.
@@ -13,7 +13,7 @@ shibboleth-sp2 (2.4.3+dfsg-5) UNRELEASED; urgency=low
     local-patch-header so that they only apply to the packages the team
     builds, and NMUs get regular version-numbered patches.
 
- -- Russ Allbery <rra@debian.org>  Thu, 02 Feb 2012 16:32:00 -0800
+ -- Russ Allbery <rra@debian.org>  Thu, 16 Feb 2012 11:26:14 -0800
 
 shibboleth-sp2 (2.4.3+dfsg-4) unstable; urgency=low
 
