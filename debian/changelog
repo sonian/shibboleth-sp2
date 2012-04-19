@@ -1,3 +1,9 @@
+shibboleth-sp2 (2.3.1+dfsg-2sonian1) unstable; urgency=low
+
+  * Bump version.
+
+ -- Decklin Foster <decklin.foster@sonian.net>  Thu, 19 Apr 2012 14:52:02 -0400
+
 shibboleth-sp2 (2.3.1+dfsg-2) unstable; urgency=low
 
   * Modify shib-keygen to create the new certificate key group-readable by
