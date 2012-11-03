@@ -1,3 +1,15 @@
+shibboleth-sp2 (2.4.3+dfsg-6) UNRELEASED; urgency=low
+
+  * Remove the (undefined) warn_log destination from the default
+    native.logger configuration file, restoring consistency with the
+    Debian modification to log to syslog.  Since all native logs go to
+    syslog, there's no need to have differentiated log destinations based
+    on threshold.  The previous version of the file referenced a
+    commented-out warn_log destination, which caused errors to be spammed
+    to syslog.
+
+ -- Russ Allbery <rra@debian.org>  Sat, 03 Nov 2012 10:27:33 -0700
+
 shibboleth-sp2 (2.4.3+dfsg-5) unstable; urgency=low
 
   * Fix syntax error in the update-rc.d invocation for shibd, which was
