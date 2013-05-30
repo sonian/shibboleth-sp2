@@ -7,6 +7,9 @@ shibboleth-sp2 (2.5.1+dfsg-1) UNRELEASED; urgency=low
     on threshold.  The previous version of the file referenced a
     commented-out warn_log destination, which caused errors to be spammed
     to syslog.
+  * Install the upstream doc/RELEASE.txt file as the upstream changelog.
+    It's not exactly a changelog, but it has pointers to the upstream web
+    documentation of changes, which is probably what people are looking for.
   * Switch repackaged upstream source to xz compression.
 
  -- Russ Allbery <rra@debian.org>  Sat, 03 Nov 2012 10:27:33 -0700
