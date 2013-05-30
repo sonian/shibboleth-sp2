@@ -1,4 +1,4 @@
-shibboleth-sp2 (2.4.3+dfsg-6) UNRELEASED; urgency=low
+shibboleth-sp2 (2.5.1+dfsg-1) UNRELEASED; urgency=low
 
   * Remove the (undefined) warn_log destination from the default
     native.logger configuration file, restoring consistency with the
@@ -7,6 +7,7 @@ shibboleth-sp2 (2.4.3+dfsg-6) UNRELEASED; urgency=low
     on threshold.  The previous version of the file referenced a
     commented-out warn_log destination, which caused errors to be spammed
     to syslog.
+  * Switch repackaged upstream source to xz compression.
 
  -- Russ Allbery <rra@debian.org>  Sat, 03 Nov 2012 10:27:33 -0700
 

@@ -28,12 +28,12 @@ get-orig-source:
 	wget $(URL)/$(VERSION)/shibboleth-sp-$(VERSION).tar.gz
 	tar xfz shibboleth-sp-$(VERSION).tar.gz
 	rm shibboleth-sp-$(VERSION).tar.gz
-	rm shibboleth-$(VERSION)/schemas/WS-Trust.xsd
-	mv shibboleth-$(VERSION) shibboleth-sp2_$(DEBVERS).orig
+	rm shibboleth-sp-$(VERSION)/schemas/WS-Trust.xsd
+	mv shibboleth-sp-$(VERSION) shibboleth-sp2_$(DEBVERS).orig
 	tar cf shibboleth-sp2_$(DEBVERS).orig.tar \
 	    shibboleth-sp2_$(DEBVERS).orig
 	rm -rf shibboleth-sp2_$(DEBVERS).orig
-	gzip -9 shibboleth-sp2_$(DEBVERS).orig.tar
+	xz shibboleth-sp2_$(DEBVERS).orig.tar
 
 override_dh_autoreconf:
 	dh_autoreconf --as-needed
