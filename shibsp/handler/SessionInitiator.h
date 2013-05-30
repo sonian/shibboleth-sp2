@@ -35,6 +35,8 @@
 
 namespace shibsp {
 
+    class SHIBSP_API AuthnRequestEvent;
+
     /**
      * Pluggable runtime functionality that handles initiating sessions.
      *
@@ -65,6 +67,19 @@ namespace shibsp {
          */
         bool checkCompatibility(SPRequest& request, bool isHandler) const;
 
+#ifndef SHIBSP_LITE
+        /**
+         * Creates a new AuthnRequestEvent for the event log.
+         *
+         * @param application   the Application associated with the event
+         * @param request       the HTTP client request associated with the event, or nullptr
+         * @return  a fresh AuthnRequestEvent, prepopulated by the input parameters, or nullptr if an error occurs
+         */
+        virtual AuthnRequestEvent* newAuthnRequestEvent(
+            const Application& application, const xmltooling::HTTPRequest* request=nullptr
+            ) const;
+#endif
+
     public:
         virtual ~SessionInitiator();
 
@@ -93,6 +108,15 @@ namespace shibsp {
 #ifndef SHIBSP_LITE
         const char* getType() const;
         void generateMetadata(opensaml::saml2md::SPSSODescriptor& role, const char* handlerURL) const;
+
+        /**
+         * Generates RequestInitiator metadata when instructed. Allows subclasses to decide whether it's
+         * appropriate to do so instead of requiring them to override the method to stop it.
+         *
+         * @param role          role object to inject metadata into
+         * @param handlerURL    base of endpoint to generate metadata with
+         */
+        void doGenerateMetadata(opensaml::saml2md::SPSSODescriptor& role, const char* handlerURL) const;
 #endif
     };
     

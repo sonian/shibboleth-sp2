@@ -33,12 +33,13 @@
 
 #include <shibsp/remoting/ListenerService.h>
 
+#include <boost/scoped_ptr.hpp>
 #include <xercesc/dom/DOM.hpp>
 #include <xmltooling/logging.h>
 #include <xmltooling/util/Threads.h>
 
 #ifdef WIN32
-# include <winsock.h>
+# include <winsock2.h>
 #endif
 
 namespace shibsp {
@@ -78,19 +79,19 @@ namespace shibsp {
 
         bool m_catchAll;
     protected:
-        bool log_error() const; // for OS-level errors
+        bool log_error(const char* fn=nullptr) const; // for OS-level errors
         xmltooling::logging::Category* log;
         /// @endcond
 
     private:
-        mutable SocketPool* m_socketpool;
+        boost::scoped_ptr<SocketPool> m_socketpool;
         bool* m_shutdown;
 
         // Manage child threads
         friend class ServerThread;
         std::map<ShibSocket,xmltooling::Thread*> m_children;
-        xmltooling::Mutex* m_child_lock;
-        xmltooling::CondWait* m_child_wait;
+        boost::scoped_ptr<xmltooling::Mutex> m_child_lock;
+        boost::scoped_ptr<xmltooling::CondWait> m_child_wait;
 
         unsigned int m_stackSize;
 

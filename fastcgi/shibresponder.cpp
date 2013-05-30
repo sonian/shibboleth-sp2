@@ -192,8 +192,8 @@ public:
         string hdr=string("Status: 302 Please Wait\r\nLocation: ") + url + "\r\n"
           "Content-Type: text/html\r\n"
           "Content-Length: 40\r\n"
-          "Expires: 01-Jan-1997 12:00:00 GMT\r\n"
-          "Cache-Control: private,no-store,no-cache\r\n";
+          "Expires: Wed, 01 Jan 1997 12:00:00 GMT\r\n"
+          "Cache-Control: private,no-store,no-cache,max-age=0\r\n";
         for (multimap<string,string>::const_iterator i=m_headers.begin(); i!=m_headers.end(); ++i)
             hdr += i->first + ": " + i->second + "\r\n";
         hdr += "\r\n";
@@ -248,10 +248,11 @@ static long gstdin(FCGX_Request* request, char** content)
         if (clen > STDIN_MAX)
             clen = STDIN_MAX;
 
-        *content = new char[clen];
+        *content = new char[clen + 1];
 
         cin.read(*content, clen);
         clen = cin.gcount();
+        (*content)[clen] = 0;
     }
     else {
         // *never* read stdin when CONTENT_LENGTH is missing or unparsable
@@ -343,8 +344,9 @@ int main(void)
         // Although FastCGI supports writing before reading,
         // many http clients (browsers) don't support it (so
         // the connection deadlocks until a timeout expires!).
-        char* content;
+        char* content = nullptr;
         gstdin(&request, &content);
+        auto_arrayptr<char> wrapper(content);
 
         try {
             xmltooling::NDC ndc("FastCGI shibresponder");
@@ -383,8 +385,6 @@ int main(void)
             cerr << "shib: FastCGI responder caught an exception: " << e.what() << endl;
             print_error("<html><body>FastCGI Shibboleth responder caught an exception, check log for details.</body></html>");
         }
-
-        delete[] content;
 
         // If the output streambufs had non-zero bufsizes and
         // were constructed outside of the accept loop (i.e.

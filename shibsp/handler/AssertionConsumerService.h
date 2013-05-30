@@ -30,14 +30,18 @@
 #include <shibsp/handler/AbstractHandler.h>
 #include <shibsp/handler/RemotedHandler.h>
 
+#include <boost/scoped_ptr.hpp>
+
 #ifndef SHIBSP_LITE
 namespace opensaml {
     class SAML_API Assertion;
     class SAML_API MessageDecoder;
     namespace saml1 {
+        class SAML_API AuthenticationStatement;
         class SAML_API NameIdentifier;
     };
     namespace saml2 {
+        class SAML_API AuthnStatement;
         class SAML_API NameID;
     };
     namespace saml2md {
@@ -49,6 +53,7 @@ namespace opensaml {
 namespace shibsp {
 
     class SHIBSP_API Attribute;
+    class SHIBSP_API LoginEvent;
     class SHIBSP_API ResolutionContext;
 
 #if defined (_MSC_VER)
@@ -93,7 +98,23 @@ namespace shibsp {
          * @param issuedTo      address for which security assertion was issued
          */
         void checkAddress(const Application& application, const xmltooling::HTTPRequest& httpRequest, const char* issuedTo) const;
-        
+
+
+        /**
+         * Complete the client's transition back to the expected resource.
+         * 
+         * @param application   reference to application receiving message
+         * @param httpRequest   client request that included message
+         * @param httpResponse  response to client
+         * @param relayState    relay state token
+         */
+        virtual std::pair<bool,long> finalizeResponse(
+            const Application& application,
+            const xmltooling::HTTPRequest& httpRequest,
+            xmltooling::HTTPResponse& httpResponse,
+            std::string& relayState
+            ) const;
+
 #ifndef SHIBSP_LITE
         void generateMetadata(opensaml::saml2md::SPSSODescriptor& role, const char* handlerURL) const;
         
@@ -150,6 +171,7 @@ namespace shibsp {
             ) const;
 
         /**
+         * @deprecated
          * Attempt SSO-initiated attribute resolution using the supplied information,
          * including NameID and token extraction and filtering followed by
          * secondary resolution.
@@ -176,6 +198,50 @@ namespace shibsp {
             const std::vector<const opensaml::Assertion*>* tokens=nullptr
             ) const;
 
+        /**
+         * Attempt SSO-initiated attribute resolution using the supplied information,
+         * including NameID and token extraction and filtering followed by
+         * secondary resolution.
+         * 
+         * <p>The caller must free the returned context handle.
+         * 
+         * @param application           reference to application receiving message
+         * @param request               request delivering message, if any
+         * @param issuer                source of SSO tokens
+         * @param protocol              SSO protocol used
+         * @param protmsg               SSO protocol message, if any
+         * @param v1nameid              identifier of principal in SAML 1.x form, if any
+         * @param v1statement           SAML 1.x authentication statement, if any
+         * @param nameid                identifier of principal in SAML 2.0 form
+         * @param statement             SAML 2.0 authentication statement, if any
+         * @param authncontext_class    method/category of authentication event, if known
+         * @param authncontext_decl     specifics of authentication event, if known
+         * @param tokens                available assertions, if any
+         */
+        ResolutionContext* resolveAttributes(
+            const Application& application,
+            const xmltooling::GenericRequest* request=nullptr,
+            const opensaml::saml2md::RoleDescriptor* issuer=nullptr,
+            const XMLCh* protocol=nullptr,
+            const xmltooling::XMLObject* protmsg=nullptr,
+            const opensaml::saml1::NameIdentifier* v1nameid=nullptr,
+            const opensaml::saml1::AuthenticationStatement* v1statement=nullptr,
+            const opensaml::saml2::NameID* nameid=nullptr,
+            const opensaml::saml2::AuthnStatement* statement=nullptr,
+            const XMLCh* authncontext_class=nullptr,
+            const XMLCh* authncontext_decl=nullptr,
+            const std::vector<const opensaml::Assertion*>* tokens=nullptr
+            ) const;
+
+        /**
+         * Creates a new AuthnRequestEvent for the event log.
+         *
+         * @param application   the Application associated with the event
+         * @param request       the HTTP client request associated with the event
+         * @return  a fresh LoginEvent, prepopulated by the input parameters, or nullptr if an error occurs
+         */
+        virtual LoginEvent* newLoginEvent(const Application& application, const xmltooling::HTTPRequest& request) const;
+
     public:
         const char* getType() const;
         const XMLCh* getProtocolFamily() const;
@@ -198,8 +264,7 @@ namespace shibsp {
             ) const;
                 
 #ifndef SHIBSP_LITE
-        opensaml::MessageDecoder* m_decoder;
-        xmltooling::QName m_role;
+        boost::scoped_ptr<opensaml::MessageDecoder> m_decoder;
 #endif
     };
 

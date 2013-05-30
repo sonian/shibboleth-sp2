@@ -25,11 +25,16 @@
  */
 
 #include "internal.h"
+#include "ServiceProvider.h"
 #include "attribute/NameIDAttribute.h"
+#include "remoting/ListenerService.h"
 
+#include <boost/algorithm/string/trim.hpp>
 #include <xmltooling/exceptions.h>
+#include <xmltooling/security/SecurityHelper.h>
 
 using namespace shibsp;
+using namespace xmltooling::logging;
 using namespace xmltooling;
 using namespace std;
 
@@ -39,23 +44,38 @@ namespace shibsp {
     }
 };
 
-NameIDAttribute::NameIDAttribute(const vector<string>& ids, const char* formatter) : Attribute(ids), m_formatter(formatter)
+NameIDAttribute::NameIDAttribute(const vector<string>& ids, const char* formatter, const char* hashAlg)
+    : Attribute(ids), m_formatter(formatter), m_hashAlg(hashAlg ? hashAlg : "")
 {
 }
 
 NameIDAttribute::NameIDAttribute(DDF& in) : Attribute(in)
 {
     DDF val = in["_formatter"];
-    if (val.isstring())
+    if (val.isstring() && val.string())
         m_formatter = val.string();
     else
         m_formatter = DEFAULT_NAMEID_FORMATTER;
+    val = in["_hashalg"];
+    if (val.isstring() && val.string())
+        m_hashAlg = val.string();
     const char* pch;
     val = in.first().first();
-    while (val.name()) {
+    while (!val.isnull()) {
         m_values.push_back(Value());
         Value& v = m_values.back();
-        v.m_Name = val.name();
+        // There are two serializations supported. The new one is in 2.5.1 and fixes SPPCPP-504.
+        // The original is the first branch and was vulnerable to non-ASCII characters in the value.
+        // Supporting both means at least minimal support for rolling upgrades if a shibd instance is
+        // shared.
+        if (val.name()) {
+            v.m_Name = val.name();
+        }
+        else {
+            pch = val["Name"].string();
+            if (pch)
+                v.m_Name = pch;
+        }
         pch = val["Format"].string();
         if (pch)
             v.m_Format = pch;
@@ -116,7 +136,7 @@ void NameIDAttribute::removeValue(size_t index)
 const vector<string>& NameIDAttribute::getSerializedValues() const
 {
     if (m_serialized.empty()) {
-        for (vector<Value>::const_iterator i=m_values.begin(); i!=m_values.end(); ++i) {
+        for (vector<Value>::const_iterator i = m_values.begin(); i != m_values.end(); ++i) {
             // This is kind of a hack, but it's a good way to reuse some code.
             XMLToolingException e(
                 m_formatter,
@@ -129,7 +149,30 @@ const vector<string>& NameIDAttribute::getSerializedValues() const
                     "SPProvidedID", i->m_SPProvidedID.c_str()
                     )
                 );
-            m_serialized.push_back(e.what());
+            if (m_hashAlg.empty()) {
+                m_serialized.push_back(e.what());
+                boost::trim(m_serialized.back());
+            }
+            else {
+                string trimmed(e.what());
+                boost::trim(trimmed);
+#ifndef SHIBSP_LITE
+                m_serialized.push_back(SecurityHelper::doHash(m_hashAlg.c_str(), trimmed.c_str(), strlen(e.what())));
+#else
+                try {
+                    DDF out, in("hash");
+                    DDFJanitor jin(in), jout(out);
+                    in.addmember("alg").string(m_hashAlg.c_str());
+                    in.addmember("data").unsafe_string(trimmed.c_str());
+                    out = SPConfig::getConfig().getServiceProvider()->getListenerService()->send(in);
+                    if (out.isstring() && out.string())
+                        m_serialized.push_back(out.string());
+                }
+                catch (exception& ex) {
+                    Category::getInstance(SHIBSP_LOGCAT".Attribute.NameID").error("exception remoting hash operation: %s", ex.what());
+                }
+#endif
+            }
         }
     }
     return Attribute::getSerializedValues();
@@ -140,9 +183,12 @@ DDF NameIDAttribute::marshall() const
     DDF ddf = Attribute::marshall();
     ddf.name("NameID");
     ddf.addmember("_formatter").string(m_formatter.c_str());
+    if (!m_hashAlg.empty())
+        ddf.addmember("_hashalg").string(m_hashAlg.c_str());
     DDF vlist = ddf.first();
     for (vector<Value>::const_iterator i=m_values.begin(); i!=m_values.end(); ++i) {
-        DDF val = DDF(i->m_Name.c_str()).structure();
+        DDF val = DDF(nullptr).structure();
+        val.addmember("Name").string(i->m_Name.c_str());
         if (!i->m_Format.empty())
             val.addmember("Format").string(i->m_Format.c_str());
         if (!i->m_NameQualifier.empty())

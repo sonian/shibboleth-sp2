@@ -21,7 +21,7 @@
 /**
  * version.h
  *
- * Library version macros and constants
+ * Library version macros and constants.
  */
 
 #ifndef __shibsp_version_h__
@@ -31,6 +31,7 @@
 // support this kind of stuff in the future. If they ever yank some
 // of this stuff, it can be copied into here.
 
+#include <shibsp/base.h>
 #include <xercesc/util/XercesVersion.hpp>
 
 // ---------------------------------------------------------------------------
@@ -42,8 +43,8 @@
  */
 
 #define SHIBSP_VERSION_MAJOR 1
-#define SHIBSP_VERSION_MINOR 4
-#define SHIBSP_VERSION_REVISION 3
+#define SHIBSP_VERSION_MINOR 5
+#define SHIBSP_VERSION_REVISION 1
 
 /** DO NOT MODIFY BELOW THIS LINE */
 
@@ -64,11 +65,12 @@
 #define SHIBSP_FULLVERSIONNUM INVK_CAT3_SEP_NIL(SHIBSP_VERSION_MAJOR,SHIBSP_VERSION_MINOR,SHIBSP_VERSION_REVISION)
 #define SHIBSP_VERSIONSTR     INVK_CAT2_SEP_UNDERSCORE(SHIBSP_VERSION_MAJOR,SHIBSP_VERSION_MINOR)
 
-const char* const    gShibSPVersionStr = SHIBSP_VERSIONSTR;
-const char* const    gShibSPFullVersionStr = SHIBSP_FULLVERSIONSTR;
-const unsigned int   gShibSPMajVersion = SHIBSP_VERSION_MAJOR;
-const unsigned int   gShibSPMinVersion = SHIBSP_VERSION_MINOR;
-const unsigned int   gShibSPRevision   = SHIBSP_VERSION_REVISION;
+extern SHIBSP_API const char* const    gShibSPVersionStr;
+extern SHIBSP_API const char* const    gShibSPFullVersionStr;
+extern SHIBSP_API const char* const    gShibSPDotVersionStr;
+extern SHIBSP_API const unsigned int   gShibSPMajVersion;
+extern SHIBSP_API const unsigned int   gShibSPMinVersion;
+extern SHIBSP_API const unsigned int   gShibSPRevision;
 
 // ShibSP version numeric constants that can be used for conditional
 // compilation purposes.

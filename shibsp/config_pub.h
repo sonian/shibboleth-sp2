@@ -6,10 +6,10 @@
 /* #undef SHIBSP_HAVE_GSSGNU */
 
 /* if you have the Heimdal gssapi libraries */
-#define SHIBSP_HAVE_GSSHEIMDAL 1
+/* #undef SHIBSP_HAVE_GSSHEIMDAL */
 
 /* if you have the MIT gssapi libraries */
-/* #undef SHIBSP_HAVE_GSSMIT */
+#define SHIBSP_HAVE_GSSMIT 1
 
 /* Define to 1 if log4cpp library is used. */
 /* #undef SHIBSP_LOG4CPP */
@@ -24,4 +24,7 @@
 /* #undef SHIBSP_XERCESC_SHORT_ACCEPTNODE */
 
 /* Define to 1 if XML-Security-C supports white/blacklisting algorithms. */
-/* #undef SHIBSP_XMLSEC_WHITELISTING */
+#define SHIBSP_XMLSEC_WHITELISTING 1
+
+/* Define to 1 if you have the <sys/socket.h> header file. */
+#define SHIBSP_HAVE_SYS_SOCKET_H 1

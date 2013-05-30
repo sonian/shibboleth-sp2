@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -58,16 +58,15 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
+  <Import Project="..\..\BuildPath.props" />
+  <Import Project="..\MsBuild\Versions.props" />
+  <Import Project="..\MsBuild\Includes.props" />
   <PropertyGroup>
     <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)$(Configuration)\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Configuration)\</IntDir>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</LinkIncremental>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(Platform)\$(Configuration)\</IntDir>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</LinkIncremental>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)$(Configuration)\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Configuration)\</IntDir>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(Platform)\$(Configuration)\</IntDir>
@@ -84,10 +83,10 @@
     <CodeAnalysisRuleSet Condition="'$(Configuration)|$(Platform)'=='Release|x64'">AllRules.ruleset</CodeAnalysisRuleSet>
     <CodeAnalysisRules Condition="'$(Configuration)|$(Platform)'=='Release|x64'" />
     <CodeAnalysisRuleAssemblies Condition="'$(Configuration)|$(Platform)'=='Release|x64'" />
-    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectName)1_4D</TargetName>
-    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectName)1_4D</TargetName>
-    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ProjectName)1_4</TargetName>
-    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ProjectName)1_4</TargetName>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectName)1_5D</TargetName>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectName)1_5D</TargetName>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ProjectName)1_5</TargetName>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ProjectName)1_5</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -103,7 +102,7 @@
       <PreprocessorDefinitions>_UNICODE;UNICODE;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>log4shib1D.lib;xerces-c_3D.lib;xsec_1D.lib;saml2D.lib;xmltooling1D.lib;wsock32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>log4shib1D.lib;xerces-c_3D.lib;xsec_1D.lib;saml2D.lib;xmltooling1D.lib;wsock32.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>..\..\cpp-opensaml\$(Configuration);..\..\cpp-xmltooling\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
@@ -129,7 +128,7 @@
       <PreprocessorDefinitions>_UNICODE;UNICODE;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>log4shib1D.lib;xerces-c_3D.lib;xsec_1D.lib;saml2D.lib;xmltooling1D.lib;wsock32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>log4shib1D.lib;xerces-c_3D.lib;xsec_1D.lib;saml2D.lib;xmltooling1D.lib;wsock32.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>..\..\cpp-opensaml\$(Platform)\$(Configuration);..\..\cpp-xmltooling\$(Platform)\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
@@ -145,7 +144,7 @@
       <WarningLevel>Level3</WarningLevel>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>log4shib1.lib;xerces-c_3.lib;xsec_1.lib;saml2.lib;xmltooling1.lib;wsock32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>log4shib1.lib;xerces-c_3.lib;xsec_1.lib;saml2.lib;xmltooling1.lib;wsock32.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>..\..\cpp-opensaml\$(Configuration);..\..\cpp-xmltooling\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <SubSystem>Windows</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
@@ -166,7 +165,7 @@
       <WarningLevel>Level3</WarningLevel>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>log4shib1.lib;xerces-c_3.lib;xsec_1.lib;saml2.lib;xmltooling1.lib;wsock32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>log4shib1.lib;xerces-c_3.lib;xsec_1.lib;saml2.lib;xmltooling1.lib;wsock32.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>..\..\cpp-opensaml\$(Platform)\$(Configuration);..\..\cpp-xmltooling\$(Platform)\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
@@ -181,16 +180,26 @@
     <ClCompile Include="AbstractSPRequest.cpp" />
     <ClCompile Include="Application.cpp" />
     <ClCompile Include="attribute\Base64AttributeDecoder.cpp" />
+    <ClCompile Include="attribute\filtering\impl\AttributeIssuerEntityAttributeFunctor.cpp" />
+    <ClCompile Include="attribute\filtering\impl\AttributeIssuerEntityMatcherFunctor.cpp" />
+    <ClCompile Include="attribute\filtering\impl\AttributeRequesterEntityAttributeFunctor.cpp" />
+    <ClCompile Include="attribute\filtering\impl\AttributeRequesterEntityMatcherFunctor.cpp" />
     <ClCompile Include="attribute\filtering\impl\DummyAttributeFilter.cpp" />
     <ClCompile Include="attribute\filtering\impl\NameIDQualifierStringFunctor.cpp" />
+    <ClCompile Include="attribute\resolver\impl\AssertionAttributeExtractor.cpp" />
+    <ClCompile Include="attribute\resolver\impl\MetadataAttributeExtractor.cpp" />
     <ClCompile Include="binding\impl\XMLProtocolProvider.cpp" />
+    <ClCompile Include="handler\impl\AttributeCheckerHandler.cpp" />
     <ClCompile Include="handler\impl\DiscoveryFeed.cpp" />
+    <ClCompile Include="handler\impl\ExternalAuthHandler.cpp" />
     <ClCompile Include="handler\impl\LogoutInitiator.cpp" />
+    <ClCompile Include="handler\impl\SecuredHandler.cpp" />
     <ClCompile Include="impl\XMLSecurityPolicyProvider.cpp" />
     <ClCompile Include="ServiceProvider.cpp" />
     <ClCompile Include="SPConfig.cpp" />
     <ClCompile Include="util\CGIParser.cpp" />
     <ClCompile Include="util\DOMPropertySet.cpp" />
+    <ClCompile Include="util\IPRange.cpp" />
     <ClCompile Include="util\SPConstants.cpp" />
     <ClCompile Include="util\TemplateParameters.cpp" />
     <ClCompile Include="security\PKIXTrustEngine.cpp" />
@@ -205,10 +214,12 @@
     <ClCompile Include="remoting\impl\TCPListener.cpp" />
     <ClCompile Include="impl\ChainingAccessControl.cpp" />
     <ClCompile Include="impl\StorageServiceSessionCache.cpp" />
+    <ClCompile Include="impl\TransactionLog.cpp" />
     <ClCompile Include="impl\XMLAccessControl.cpp" />
     <ClCompile Include="impl\XMLRequestMapper.cpp" />
     <ClCompile Include="impl\XMLServiceProvider.cpp" />
     <ClCompile Include="attribute\Attribute.cpp" />
+    <ClCompile Include="attribute\BinaryAttribute.cpp" />
     <ClCompile Include="attribute\DOMAttributeDecoder.cpp" />
     <ClCompile Include="attribute\ExtensibleAttribute.cpp" />
     <ClCompile Include="attribute\KeyInfoAttributeDecoder.cpp" />
@@ -278,11 +289,13 @@
     <ClCompile Include="handler\impl\StatusHandler.cpp" />
     <ClCompile Include="handler\impl\TransformSessionInitiator.cpp" />
     <ClCompile Include="handler\impl\WAYFSessionInitiator.cpp" />
+    <ClCompile Include="version.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="binding\ProtocolProvider.h" />
     <ClInclude Include="GSSRequest.h" />
     <ClInclude Include="handler\LogoutInitiator.h" />
+    <ClInclude Include="handler\SecuredHandler.h" />
     <ClInclude Include="remoting\impl\SocketListener.h" />
     <ClInclude Include="AbstractSPRequest.h" />
     <ClInclude Include="AccessControl.h" />
@@ -303,6 +316,7 @@
     <ClInclude Include="version.h" />
     <ClInclude Include="util\CGIParser.h" />
     <ClInclude Include="util\DOMPropertySet.h" />
+    <ClInclude Include="util\IPRange.h" />
     <ClInclude Include="util\PropertySet.h" />
     <ClInclude Include="util\SPConstants.h" />
     <ClInclude Include="util\TemplateParameters.h" />
@@ -311,6 +325,7 @@
     <ClInclude Include="remoting\ddf.h" />
     <ClInclude Include="remoting\ListenerService.h" />
     <ClInclude Include="attribute\Attribute.h" />
+    <ClInclude Include="attribute\BinaryAttribute.h" />
     <ClInclude Include="attribute\AttributeDecoder.h" />
     <ClInclude Include="attribute\ExtensibleAttribute.h" />
     <ClInclude Include="attribute\NameIDAttribute.h" />

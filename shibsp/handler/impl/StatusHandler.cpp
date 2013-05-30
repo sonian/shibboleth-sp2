@@ -29,10 +29,12 @@
 #include "exceptions.h"
 #include "ServiceProvider.h"
 #include "SPRequest.h"
-#include "handler/AbstractHandler.h"
 #include "handler/RemotedHandler.h"
+#include "handler/SecuredHandler.h"
 #include "util/CGIParser.h"
 
+#include <boost/iterator/indirect_iterator.hpp>
+#include <boost/scoped_ptr.hpp>
 #include <xmltooling/version.h>
 #include <xmltooling/util/DateTime.h>
 
@@ -53,6 +55,7 @@ using namespace opensaml;
 using namespace xmlsignature;
 #endif
 using namespace xmltooling;
+using namespace boost;
 using namespace std;
 
 namespace shibsp {
@@ -62,22 +65,7 @@ namespace shibsp {
     #pragma warning( disable : 4250 )
 #endif
 
-    class SHIBSP_DLLLOCAL Blocker : public DOMNodeFilter
-    {
-    public:
-#ifdef SHIBSP_XERCESC_SHORT_ACCEPTNODE
-        short
-#else
-        FilterAction
-#endif
-        acceptNode(const DOMNode* node) const {
-            return FILTER_REJECT;
-        }
-    };
-
-    static SHIBSP_DLLLOCAL Blocker g_Blocker;
-
-    class SHIBSP_API StatusHandler : public AbstractHandler, public RemotedHandler
+    class SHIBSP_API StatusHandler : public SecuredHandler, public RemotedHandler
     {
     public:
         StatusHandler(const DOMElement* e, const char* appId);
@@ -89,8 +77,6 @@ namespace shibsp {
     private:
         pair<bool,long> processMessage(const Application& application, const HTTPRequest& httpRequest, HTTPResponse& httpResponse) const;
         ostream& systemInfo(ostream& os) const;
-
-        set<string> m_acl;
     };
 
 #if defined (_MSC_VER)
@@ -123,25 +109,27 @@ namespace shibsp {
     public:
         DummyRequest(const char* url) : m_parser(nullptr), m_url(url), m_scheme(nullptr), m_query(nullptr), m_port(0) {
 #ifdef HAVE_STRCASECMP
-            if (url && !strncasecmp(url,"http://",7)) {
-                m_scheme="http";
-                url+=7;
+            if (url && !strncasecmp(url,"http://", 7)) {
+                m_scheme = "http";
+                m_port = 80;
+                url += 7;
             }
-            else if (url && !strncasecmp(url,"https://",8)) {
-                m_scheme="https";
-                url+=8;
+            else if (url && !strncasecmp(url,"https://", 8)) {
+                m_scheme = "https";
+                m_port = 443;
+                url += 8;
             }
             else
 #else
-            if (url && !strnicmp(url,"http://",7)) {
-                m_scheme="http";
+            if (url && !strnicmp(url,"http://", 7)) {
+                m_scheme = "http";
                 m_port = 80;
-                url+=7;
+                url += 7;
             }
-            else if (url && !strnicmp(url,"https://",8)) {
+            else if (url && !strnicmp(url,"https://", 8)) {
                 m_scheme="https";
                 m_port = 443;
-                url+=8;
+                url += 8;
             }
             else
 #endif
@@ -181,9 +169,7 @@ namespace shibsp {
             }
         }
 
-        ~DummyRequest() {
-            delete m_parser;
-        }
+        virtual ~DummyRequest() {}
 
         const char* getRequestURL() const {
             return m_url;
@@ -224,18 +210,18 @@ namespace shibsp {
         const char* getParameter(const char* name) const
         {
             if (!m_parser)
-                m_parser=new CGIParser(*this);
+                m_parser.reset(new CGIParser(*this));
 
-            pair<CGIParser::walker,CGIParser::walker> bounds=m_parser->getParameters(name);
-            return (bounds.first==bounds.second) ? nullptr : bounds.first->second;
+            pair<CGIParser::walker,CGIParser::walker> bounds = m_parser->getParameters(name);
+            return (bounds.first == bounds.second) ? nullptr : bounds.first->second;
         }
         vector<const char*>::size_type getParameters(const char* name, vector<const char*>& values) const
         {
             if (!m_parser)
-                m_parser=new CGIParser(*this);
+                m_parser.reset(new CGIParser(*this));
 
-            pair<CGIParser::walker,CGIParser::walker> bounds=m_parser->getParameters(name);
-            while (bounds.first!=bounds.second) {
+            pair<CGIParser::walker,CGIParser::walker> bounds = m_parser->getParameters(name);
+            while (bounds.first != bounds.second) {
                 values.push_back(bounds.first->second);
                 ++bounds.first;
             }
@@ -255,7 +241,7 @@ namespace shibsp {
         }
 
     private:
-        mutable CGIParser* m_parser;
+        mutable scoped_ptr<CGIParser> m_parser;
         const char* m_url;
         const char* m_scheme;
         const char* m_query;
@@ -265,37 +251,19 @@ namespace shibsp {
 };
 
 StatusHandler::StatusHandler(const DOMElement* e, const char* appId)
-    : AbstractHandler(e, Category::getInstance(SHIBSP_LOGCAT".StatusHandler"), &g_Blocker)
+    : SecuredHandler(e, Category::getInstance(SHIBSP_LOGCAT".StatusHandler"))
 {
     string address(appId);
     address += getString("Location").second;
     setAddress(address.c_str());
-    if (SPConfig::getConfig().isEnabled(SPConfig::InProcess)) {
-        pair<bool,const char*> acl = getString("acl");
-        if (acl.first) {
-            string aclbuf=acl.second;
-            int j = 0;
-            for (unsigned int i=0;  i < aclbuf.length();  i++) {
-                if (aclbuf.at(i)==' ') {
-                    m_acl.insert(aclbuf.substr(j, i-j));
-                    j = i+1;
-                }
-            }
-            m_acl.insert(aclbuf.substr(j, aclbuf.length()-j));
-        }
-    }
 }
 
 pair<bool,long> StatusHandler::run(SPRequest& request, bool isHandler) const
 {
-    SPConfig& conf = SPConfig::getConfig();
-    if (conf.isEnabled(SPConfig::InProcess)) {
-        if (!m_acl.empty() && m_acl.count(request.getRemoteAddr()) == 0) {
-            m_log.error("status handler request blocked from invalid address (%s)", request.getRemoteAddr().c_str());
-            istringstream msg("Status Handler Blocked");
-            return make_pair(true,request.sendResponse(msg, HTTPResponse::XMLTOOLING_HTTP_STATUS_FORBIDDEN));
-        }
-    }
+    // Check ACL in base class.
+    pair<bool,long> ret = SecuredHandler::run(request, isHandler);
+    if (ret.first)
+        return ret;
 
     const char* target = request.getParameter("target");
     if (target) {
@@ -312,10 +280,10 @@ pair<bool,long> StatusHandler::run(SPRequest& request, bool isHandler) const
         stringstream msg;
         msg << "<StatusHandler time='" << timestamp.get() << "'>";
             msg << "<Version Xerces-C='" << XERCES_FULLVERSIONDOT
-                << "' XML-Tooling-C='" << XMLTOOLING_FULLVERSIONDOT
+                << "' XML-Tooling-C='" << gXMLToolingDotVersionStr
 #ifndef SHIBSP_LITE
                 << "' XML-Security-C='" << XSEC_FULLVERSIONDOT
-                << "' OpenSAML-C='" << OPENSAML_FULLVERSIONDOT
+                << "' OpenSAML-C='" << gOpenSAMLDotVersionStr
 #endif
                 << "' Shibboleth='" << PACKAGE_VERSION << "'/>";
             systemInfo(msg) << "<RequestSettings";
@@ -324,11 +292,11 @@ pair<bool,long> StatusHandler::run(SPRequest& request, bool isHandler) const
             msg << '>' << target << "</RequestSettings>";
             msg << "<Status><OK/></Status>";
         msg << "</StatusHandler>";
-        return make_pair(true,request.sendResponse(msg));
+        return make_pair(true, request.sendResponse(msg));
     }
 
     try {
-        if (conf.isEnabled(SPConfig::OutOfProcess)) {
+        if (SPConfig::getConfig().isEnabled(SPConfig::OutOfProcess)) {
             // When out of process, we run natively and directly process the message.
             return processMessage(request.getApplication(), request, request);
         }
@@ -349,17 +317,17 @@ pair<bool,long> StatusHandler::run(SPRequest& request, bool isHandler) const
         stringstream msg;
         msg << "<StatusHandler time='" << timestamp.get() << "'>";
             msg << "<Version Xerces-C='" << XERCES_FULLVERSIONDOT
-                << "' XML-Tooling-C='" << XMLTOOLING_FULLVERSIONDOT
+                << "' XML-Tooling-C='" << gXMLToolingDotVersionStr
 #ifndef SHIBSP_LITE
                 << "' XML-Security-C='" << XSEC_FULLVERSIONDOT
-                << "' OpenSAML-C='" << OPENSAML_FULLVERSIONDOT
+                << "' OpenSAML-C='" << gOpenSAMLDotVersionStr
 #endif
                 << "' Shibboleth='" << PACKAGE_VERSION << "'/>";
             systemInfo(msg) << "<Status><Exception type='" << ex.getClassName() << "'>" << ex.what() << "</Exception></Status>";
         msg << "</StatusHandler>";
-        return make_pair(true,request.sendResponse(msg, HTTPResponse::XMLTOOLING_HTTP_STATUS_ERROR));
+        return make_pair(true, request.sendResponse(msg, HTTPResponse::XMLTOOLING_HTTP_STATUS_ERROR));
     }
-    catch (exception& ex) {
+    catch (std::exception& ex) {
         m_log.error("error while processing request: %s", ex.what());
         DateTime now(time(nullptr));
         now.parseDateTime();
@@ -368,23 +336,23 @@ pair<bool,long> StatusHandler::run(SPRequest& request, bool isHandler) const
         stringstream msg;
         msg << "<StatusHandler time='" << timestamp.get() << "'>";
             msg << "<Version Xerces-C='" << XERCES_FULLVERSIONDOT
-                << "' XML-Tooling-C='" << XMLTOOLING_FULLVERSIONDOT
+                << "' XML-Tooling-C='" << gXMLToolingDotVersionStr
 #ifndef SHIBSP_LITE
                 << "' XML-Security-C='" << XSEC_FULLVERSIONDOT
-                << "' OpenSAML-C='" << OPENSAML_FULLVERSIONDOT
+                << "' OpenSAML-C='" << gOpenSAMLDotVersionStr
 #endif
                 << "' Shibboleth='" << PACKAGE_VERSION << "'/>";
             systemInfo(msg) << "<Status><Exception type='std::exception'>" << ex.what() << "</Exception></Status>";
         msg << "</StatusHandler>";
-        return make_pair(true,request.sendResponse(msg, HTTPResponse::XMLTOOLING_HTTP_STATUS_ERROR));
+        return make_pair(true, request.sendResponse(msg, HTTPResponse::XMLTOOLING_HTTP_STATUS_ERROR));
     }
 }
 
 void StatusHandler::receive(DDF& in, ostream& out)
 {
     // Find application.
-    const char* aid=in["application_id"].string();
-    const Application* app=aid ? SPConfig::getConfig().getServiceProvider()->getApplication(aid) : nullptr;
+    const char* aid = in["application_id"].string();
+    const Application* app = aid ? SPConfig::getConfig().getServiceProvider()->getApplication(aid) : nullptr;
     if (!app) {
         // Something's horribly wrong.
         m_log.error("couldn't find application (%s) for status request", aid ? aid : "(missing)");
@@ -394,13 +362,13 @@ void StatusHandler::receive(DDF& in, ostream& out)
     // Wrap a response shim.
     DDF ret(nullptr);
     DDFJanitor jout(ret);
-    auto_ptr<HTTPRequest> req(getRequest(in));
-    auto_ptr<HTTPResponse> resp(getResponse(ret));
+    scoped_ptr<HTTPRequest> req(getRequest(in));
+    scoped_ptr<HTTPResponse> resp(getResponse(ret));
 
     // Since we're remoted, the result should either be a throw, a false/0 return,
     // which we just return as an empty structure, or a response/redirect,
     // which we capture in the facade and send back.
-    processMessage(*app, *req.get(), *resp.get());
+    processMessage(*app, *req, *resp);
     out << ret;
 }
 
@@ -420,9 +388,9 @@ pair<bool,long> StatusHandler::processMessage(
     const char* status = "<OK/>";
 
     s << "<Version Xerces-C='" << XERCES_FULLVERSIONDOT
-        << "' XML-Tooling-C='" << XMLTOOLING_FULLVERSIONDOT
+        << "' XML-Tooling-C='" << gXMLToolingDotVersionStr
         << "' XML-Security-C='" << XSEC_FULLVERSIONDOT
-        << "' OpenSAML-C='" << OPENSAML_FULLVERSIONDOT
+        << "' OpenSAML-C='" << gOpenSAMLDotVersionStr
         << "' Shibboleth='" << PACKAGE_VERSION << "'/>";
 
     systemInfo(s);
@@ -446,36 +414,39 @@ pair<bool,long> StatusHandler::processMessage(
             s << "<SessionCache><Exception type='" << ex.getClassName() << "'>" << ex.what() << "</Exception></SessionCache>";
             status = "<Partial/>";
         }
-        catch (exception& ex) {
+        catch (std::exception& ex) {
             s << "<SessionCache><Exception type='std::exception'>" << ex.what() << "</Exception></SessionCache>";
             status = "<Partial/>";
         }
 
-        const PropertySet* relyingParty=nullptr;
+        MetadataProvider* m = application.getMetadataProvider(false);
+        Locker mlock(m);
+
+        const PropertySet* relyingParty = nullptr;
         param=httpRequest.getParameter("entityID");
-        if (param) {
-            MetadataProvider* m = application.getMetadataProvider();
-            Locker mlock(m);
+        if (m && param)
             relyingParty = application.getRelyingParty(m->getEntityDescriptor(MetadataProviderCriteria(application, param)).first);
-        }
-        else {
+        else
             relyingParty = &application;
-        }
 
         s << "<Application id='" << application.getId() << "' entityID='" << relyingParty->getString("entityID").second << "'/>";
+
+        if (m)
+            m->outputStatus(s);
 
         s << "<Handlers>";
         vector<const Handler*> handlers;
         application.getHandlers(handlers);
-        for (vector<const Handler*>::const_iterator h = handlers.begin(); h != handlers.end(); ++h) {
-            s << "<Handler type='" << (*h)->getType() << "' Location='" << (*h)->getString("Location").second << "'";
-            if ((*h)->getString("Binding").first)
-                s << " Binding='" << (*h)->getString("Binding").second << "'";
+        for (indirect_iterator<vector<const Handler*>::const_iterator> h = make_indirect_iterator(handlers.begin());
+                h != make_indirect_iterator(handlers.end()); ++h) {
+            s << "<Handler type='" << h->getType() << "' Location='" << h->getString("Location").second << "'";
+            if (h->getString("Binding").first)
+                s << " Binding='" << h->getString("Binding").second << "'";
             s << "/>";
         }
         s << "</Handlers>";
 
-        CredentialResolver* credResolver=application.getCredentialResolver();
+        CredentialResolver* credResolver = application.getCredentialResolver();
         if (credResolver) {
             Locker credLocker(credResolver);
             CredentialCriteria cc;
@@ -484,11 +455,11 @@ pair<bool,long> StatusHandler::processMessage(
             if (keyName.first)
                 cc.getKeyNames().insert(keyName.second);
             vector<const Credential*> creds;
-            credResolver->resolve(creds,&cc);
+            credResolver->resolve(creds, &cc);
             for (vector<const Credential*>::const_iterator c = creds.begin(); c != creds.end(); ++c) {
                 KeyInfo* kinfo = (*c)->getKeyInfo();
                 if (kinfo) {
-                    auto_ptr<KeyDescriptor> kd(KeyDescriptorBuilder::buildKeyDescriptor());
+                    scoped_ptr<KeyDescriptor> kd(KeyDescriptorBuilder::buildKeyDescriptor());
                     kd->setUse(KeyDescriptor::KEYTYPE_SIGNING);
                     kd->setKeyInfo(kinfo);
                     s << *(kd.get());
@@ -498,11 +469,11 @@ pair<bool,long> StatusHandler::processMessage(
             cc.setUsage(Credential::ENCRYPTION_CREDENTIAL);
             creds.clear();
             cc.getKeyNames().clear();
-            credResolver->resolve(creds,&cc);
+            credResolver->resolve(creds, &cc);
             for (vector<const Credential*>::const_iterator c = creds.begin(); c != creds.end(); ++c) {
                 KeyInfo* kinfo = (*c)->getKeyInfo();
                 if (kinfo) {
-                    auto_ptr<KeyDescriptor> kd(KeyDescriptorBuilder::buildKeyDescriptor());
+                    scoped_ptr<KeyDescriptor> kd(KeyDescriptorBuilder::buildKeyDescriptor());
                     kd->setUse(KeyDescriptor::KEYTYPE_ENCRYPTION);
                     kd->setKeyInfo(kinfo);
                     s << *(kd.get());
@@ -516,7 +487,7 @@ pair<bool,long> StatusHandler::processMessage(
     httpResponse.setContentType("text/xml");
     return make_pair(true, httpResponse.sendResponse(s));
 #else
-    return make_pair(false,0L);
+    return make_pair(false, 0L);
 #endif
 }
 
