@@ -37,10 +37,10 @@
 #include <shibsp/ServiceProvider.h>
 
 #include <set>
-#include <sstream>
 #include <fstream>
 #include <stdexcept>
 #include <process.h>
+#include <boost/lexical_cast.hpp>
 #include <xmltooling/unicode.h>
 #include <xmltooling/XMLToolingConfig.h>
 #include <xmltooling/util/NDC.h>
@@ -56,6 +56,7 @@
 using namespace shibsp;
 using namespace xmltooling;
 using namespace xercesc;
+using namespace boost;
 using namespace std;
 
 // globals
@@ -72,19 +73,15 @@ namespace {
 
     struct site_t {
         site_t(const DOMElement* e)
+            : m_name(XMLHelper::getAttrString(e, "", name)),
+                m_scheme(XMLHelper::getAttrString(e, "", scheme)),
+                m_port(XMLHelper::getAttrString(e, "", port)),
+                m_sslport(XMLHelper::getAttrString(e, "", sslport))
         {
-            auto_ptr_char n(e->getAttributeNS(nullptr,name));
-            auto_ptr_char s(e->getAttributeNS(nullptr,scheme));
-            auto_ptr_char p(e->getAttributeNS(nullptr,port));
-            auto_ptr_char p2(e->getAttributeNS(nullptr,sslport));
-            if (n.get()) m_name=n.get();
-            if (s.get()) m_scheme=s.get();
-            if (p.get()) m_port=p.get();
-            if (p2.get()) m_sslport=p2.get();
             e = XMLHelper::getFirstChildElement(e, Alias);
             while (e) {
                 if (e->hasChildNodes()) {
-                    auto_ptr_char alias(e->getFirstChild()->getNodeValue());
+                    auto_ptr_char alias(e->getTextContent());
                     m_aliases.insert(alias.get());
                 }
                 e = XMLHelper::getNextSiblingElement(e, Alias);
@@ -132,8 +129,8 @@ void _my_invalid_parameter_handler(
 
 extern "C" __declspec(dllexport) BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID)
 {
-    if (fdwReason==DLL_PROCESS_ATTACH)
-        g_hinstDLL=hinstDLL;
+    if (fdwReason == DLL_PROCESS_ATTACH)
+        g_hinstDLL = hinstDLL;
     return TRUE;
 }
 
@@ -148,7 +145,7 @@ extern "C" BOOL WINAPI GetExtensionVersion(HSE_VERSION_INFO* pVer)
         return FALSE;
     }
 
-    pVer->dwExtensionVersion=HSE_VERSION;
+    pVer->dwExtensionVersion = HSE_VERSION;
     strncpy(pVer->lpszExtensionDesc,"Shibboleth ISAPI Extension",HSE_MAX_EXT_DLL_NAME_LEN-1);
     return TRUE;
 }
@@ -168,7 +165,7 @@ extern "C" BOOL WINAPI GetFilterVersion(PHTTP_FILTER_VERSION pVer)
         return TRUE;
     }
 
-    g_Config=&SPConfig::getConfig();
+    g_Config = &SPConfig::getConfig();
     g_Config->setFeatures(
         SPConfig::Listener |
         SPConfig::Caching |
@@ -178,7 +175,7 @@ extern "C" BOOL WINAPI GetFilterVersion(PHTTP_FILTER_VERSION pVer)
         SPConfig::Handlers
         );
     if (!g_Config->init()) {
-        g_Config=nullptr;
+        g_Config = nullptr;
         LogEvent(nullptr, EVENTLOG_ERROR_TYPE, 2100, nullptr,
                 "Filter startup failed during library initialization, check native log for help.");
         return FALSE;
@@ -188,7 +185,7 @@ extern "C" BOOL WINAPI GetFilterVersion(PHTTP_FILTER_VERSION pVer)
         if (!g_Config->instantiate(nullptr, true))
             throw runtime_error("unknown error");
     }
-    catch (exception& ex) {
+    catch (std::exception& ex) {
         g_Config->term();
         g_Config=nullptr;
         LogEvent(nullptr, EVENTLOG_ERROR_TYPE, 2100, nullptr, ex.what());
@@ -198,16 +195,16 @@ extern "C" BOOL WINAPI GetFilterVersion(PHTTP_FILTER_VERSION pVer)
     }
 
     // Access implementation-specifics and site mappings.
-    ServiceProvider* sp=g_Config->getServiceProvider();
+    ServiceProvider* sp = g_Config->getServiceProvider();
     Locker locker(sp);
-    const PropertySet* props=sp->getPropertySet("InProcess");
+    const PropertySet* props = sp->getPropertySet("InProcess");
     if (props) {
-        pair<bool,bool> flag=props->getBool("checkSpoofing");
+        pair<bool,bool> flag = props->getBool("checkSpoofing");
         g_checkSpoofing = !flag.first || flag.second;
-        flag=props->getBool("catchAll");
+        flag = props->getBool("catchAll");
         g_catchAll = flag.first && flag.second;
 
-        pair<bool,const char*> unsetValue=props->getString("unsetHeaderValue");
+        pair<bool,const char*> unsetValue = props->getString("unsetHeaderValue");
         if (unsetValue.first)
             g_unsetHeaderValue = unsetValue.second;
         if (g_checkSpoofing) {
@@ -219,9 +216,8 @@ extern "C" BOOL WINAPI GetFilterVersion(PHTTP_FILTER_VERSION pVer)
                 unsigned int randkey=0,randkey2=0,randkey3=0,randkey4=0;
                 if (rand_s(&randkey) == 0 && rand_s(&randkey2) == 0 && rand_s(&randkey3) == 0 && rand_s(&randkey4) == 0) {
                     _set_invalid_parameter_handler(old);
-                    ostringstream keystr;
-                    keystr << randkey << randkey2 << randkey3 << randkey4;
-                    g_spoofKey = keystr.str();
+                    g_spoofKey = lexical_cast<string>(randkey) + lexical_cast<string>(randkey2) +
+                        lexical_cast<string>(randkey3) + lexical_cast<string>(randkey4);
                 }
                 else {
                     _set_invalid_parameter_handler(old);
@@ -229,7 +225,7 @@ extern "C" BOOL WINAPI GetFilterVersion(PHTTP_FILTER_VERSION pVer)
                             "Filter failed to generate a random anti-spoofing key (if this is Windows 2000 set one manually).");
                     locker.assign();    // pops lock on SP config
                     g_Config->term();
-                    g_Config=nullptr;
+                    g_Config = nullptr;
                     return FALSE;
                 }
             }
@@ -241,18 +237,18 @@ extern "C" BOOL WINAPI GetFilterVersion(PHTTP_FILTER_VERSION pVer)
             g_bNormalizeRequest = !flag.first || flag.second;
             flag = props->getBool("safeHeaderNames");
             g_bSafeHeaderNames = flag.first && flag.second;
-            const DOMElement* child = XMLHelper::getFirstChildElement(props->getElement(),Site);
+            const DOMElement* child = XMLHelper::getFirstChildElement(props->getElement(), Site);
             while (child) {
-                auto_ptr_char id(child->getAttributeNS(nullptr,id));
-                if (id.get())
-                    g_Sites.insert(pair<string,site_t>(id.get(),site_t(child)));
-                child=XMLHelper::getNextSiblingElement(child,Site);
+                string id(XMLHelper::getAttrString(child, "", id));
+                if (!id.empty())
+                    g_Sites.insert(make_pair(id, site_t(child)));
+                child = XMLHelper::getNextSiblingElement(child, Site);
             }
         }
     }
 
-    pVer->dwFilterVersion=HTTP_FILTER_REVISION;
-    strncpy(pVer->lpszFilterDesc,"Shibboleth ISAPI Filter",SF_MAX_FILTER_DESC_LEN);
+    pVer->dwFilterVersion = HTTP_FILTER_REVISION;
+    strncpy(pVer->lpszFilterDesc, "Shibboleth ISAPI Filter", SF_MAX_FILTER_DESC_LEN);
     pVer->dwFlags=(SF_NOTIFY_ORDER_HIGH |
                    SF_NOTIFY_SECURE_PORT |
                    SF_NOTIFY_NONSECURE_PORT |
@@ -321,61 +317,6 @@ bool dynabuf::operator==(const char* s) const
         return strcmp(bufptr,s)==0;
 }
 
-void GetServerVariable(PHTTP_FILTER_CONTEXT pfc, LPSTR lpszVariable, dynabuf& s, DWORD size=80, bool bRequired=true)
-{
-    s.reserve(size);
-    s.erase();
-    size=s.size();
-
-    while (!pfc->GetServerVariable(pfc,lpszVariable,s,&size)) {
-        // Grumble. Check the error.
-        DWORD e=GetLastError();
-        if (e==ERROR_INSUFFICIENT_BUFFER)
-            s.reserve(size);
-        else
-            break;
-    }
-    if (bRequired && s.empty())
-        throw ERROR_NO_DATA;
-}
-
-void GetServerVariable(LPEXTENSION_CONTROL_BLOCK lpECB, LPSTR lpszVariable, dynabuf& s, DWORD size=80, bool bRequired=true)
-{
-    s.reserve(size);
-    s.erase();
-    size=s.size();
-
-    while (!lpECB->GetServerVariable(lpECB->ConnID,lpszVariable,s,&size)) {
-        // Grumble. Check the error.
-        DWORD e=GetLastError();
-        if (e==ERROR_INSUFFICIENT_BUFFER)
-            s.reserve(size);
-        else
-            break;
-    }
-    if (bRequired && s.empty())
-        throw ERROR_NO_DATA;
-}
-
-void GetHeader(PHTTP_FILTER_PREPROC_HEADERS pn, PHTTP_FILTER_CONTEXT pfc,
-               LPSTR lpszName, dynabuf& s, DWORD size=80, bool bRequired=true)
-{
-    s.reserve(size);
-    s.erase();
-    size=s.size();
-
-    while (!pn->GetHeader(pfc,lpszName,s,&size)) {
-        // Grumble. Check the error.
-        DWORD e=GetLastError();
-        if (e==ERROR_INSUFFICIENT_BUFFER)
-            s.reserve(size);
-        else
-            break;
-    }
-    if (bRequired && s.empty())
-        throw ERROR_NO_DATA;
-}
-
 /****************************************************************************/
 // ISAPI Filter
 
@@ -396,13 +337,18 @@ public:
 
     // URL path always come from IIS.
     dynabuf var(256);
-    GetHeader(pn,pfc,"url",var,256,false);
+    GetHeader("url",var,256,false);
     setRequestURI(var);
 
     // Port may come from IIS or from site def.
     if (!g_bNormalizeRequest || (pfc->fIsSecurePort && site.m_sslport.empty()) || (!pfc->fIsSecurePort && site.m_port.empty())) {
-        GetServerVariable(pfc,"SERVER_PORT",var,10);
-        m_port = atoi(var);
+        GetServerVariable("SERVER_PORT",var,10);
+        if (var.empty()) {
+            m_port = pfc->fIsSecurePort ? 443 : 80;
+        }
+        else {
+            m_port = atoi(var);
+        }
     }
     else if (pfc->fIsSecurePort) {
         m_port = atoi(site.m_sslport.c_str());
@@ -416,15 +362,20 @@ public:
     if (m_scheme.empty() || !g_bNormalizeRequest)
         m_scheme=pfc->fIsSecurePort ? "https" : "http";
 
-    GetServerVariable(pfc,"SERVER_NAME",var,32);
+    GetServerVariable("SERVER_NAME",var,32);
 
-    // Make sure SERVER_NAME is "authorized" for use on this site. If not, set to canonical name.
-    m_hostname = var;
-    if (site.m_name!=m_hostname && site.m_aliases.find(m_hostname)==site.m_aliases.end())
-        m_hostname=site.m_name;
+    // Make sure SERVER_NAME is "authorized" for use on this site. If not, or empty, set to canonical name.
+    if (var.empty()) {
+        m_hostname = site.m_name;
+    }
+    else {
+        m_hostname = var;
+        if (site.m_name != m_hostname && site.m_aliases.find(m_hostname) == site.m_aliases.end())
+            m_hostname = site.m_name;
+    }
 
     if (!g_spoofKey.empty()) {
-        GetHeader(pn, pfc, "ShibSpoofCheck:", var, 32, false);
+        GetHeader("ShibSpoofCheck:", var, 32, false);
         if (!var.empty() && g_spoofKey == (char*)var)
             m_firsttime = false;
     }
@@ -451,7 +402,7 @@ public:
   const char* getMethod() const {
     if (m_method.empty()) {
         dynabuf var(5);
-        GetServerVariable(m_pfc,"HTTP_METHOD",var,5,false);
+        GetServerVariable("HTTP_METHOD",var,5,false);
         if (!var.empty())
             m_method = var;
     }
@@ -460,7 +411,7 @@ public:
   string getContentType() const {
     if (m_content_type.empty()) {
         dynabuf var(32);
-        GetServerVariable(m_pfc,"HTTP_CONTENT_TYPE",var,32,false);
+        GetServerVariable("HTTP_CONTENT_TYPE",var,32,false);
         if (!var.empty())
             m_content_type = var;
     }
@@ -470,13 +421,13 @@ public:
     m_remote_addr = AbstractSPRequest::getRemoteAddr();
     if (m_remote_addr.empty()) {
         dynabuf var(16);
-        GetServerVariable(m_pfc,"REMOTE_ADDR",var,16,false);
+        GetServerVariable("REMOTE_ADDR",var,16,false);
         if (!var.empty())
             m_remote_addr = var;
     }
     return m_remote_addr;
   }
-  void log(SPLogLevel level, const string& msg) {
+  void log(SPLogLevel level, const string& msg) const {
     AbstractSPRequest::log(level,msg);
     if (level >= SPCrit)
         LogEvent(nullptr, EVENTLOG_ERROR_TYPE, 2100, nullptr, msg.c_str());
@@ -492,10 +443,12 @@ public:
   void clearHeader(const char* rawname, const char* cginame) {
     if (g_checkSpoofing && m_firsttime) {
         if (m_allhttp.empty())
-	        GetServerVariable(m_pfc, "ALL_HTTP", m_allhttp, 4096);
-        string hdr = g_bSafeHeaderNames ? ("HTTP_" + makeSafeHeader(cginame + 5)) : (string(cginame) + ':');
-        if (strstr(m_allhttp, hdr.c_str()))
-            throw opensaml::SecurityPolicyException("Attempt to spoof header ($1) was detected.", params(1, hdr.c_str()));
+	        GetServerVariable( "ALL_HTTP", m_allhttp, 4096, false);
+        if (!m_allhttp.empty()) {
+            string hdr = g_bSafeHeaderNames ? ("HTTP_" + makeSafeHeader(cginame + 5)) : (string(cginame) + ':');
+            if (strstr(m_allhttp, hdr.c_str()))
+                throw opensaml::SecurityPolicyException("Attempt to spoof header ($1) was detected.", params(1, hdr.c_str()));
+        }
     }
     if (g_bSafeHeaderNames) {
         string hdr = makeSafeHeader(rawname);
@@ -517,14 +470,14 @@ public:
   string getSecureHeader(const char* name) const {
     string hdr = g_bSafeHeaderNames ? makeSafeHeader(name) : (string(name) + ':');
     dynabuf buf(256);
-    GetHeader(m_pn, m_pfc, const_cast<char*>(hdr.c_str()), buf, 256, false);
+    GetHeader(const_cast<char*>(hdr.c_str()), buf, 256, false);
     return string(buf.empty() ? "" : buf);
   }
   string getHeader(const char* name) const {
     string hdr(name);
     hdr += ':';
     dynabuf buf(256);
-    GetHeader(m_pn, m_pfc, const_cast<char*>(hdr.c_str()), buf, 256, false);
+    GetHeader(const_cast<char*>(hdr.c_str()), buf, 256, false);
     return string(buf.empty() ? "" : buf);
   }
   void setRemoteUser(const char* user) {
@@ -547,7 +500,7 @@ public:
   }
   long sendResponse(istream& in, long status) {
     string hdr = string("Connection: close\r\n");
-    for (multimap<string,string>::const_iterator i=m_headers.begin(); i!=m_headers.end(); ++i)
+    for (multimap<string,string>::const_iterator i = m_headers.begin(); i != m_headers.end(); ++i)
         hdr += i->first + ": " + i->second + "\r\n";
     hdr += "\r\n";
     const char* codestr="200 OK";
@@ -558,7 +511,7 @@ public:
         case XMLTOOLING_HTTP_STATUS_NOTFOUND:       codestr="404 Not Found"; break;
         case XMLTOOLING_HTTP_STATUS_ERROR:          codestr="500 Server Error"; break;
     }
-    m_pfc->ServerSupportFunction(m_pfc, SF_REQ_SEND_RESPONSE_HEADER, (void*)codestr, (DWORD)hdr.c_str(), 0);
+    m_pfc->ServerSupportFunction(m_pfc, SF_REQ_SEND_RESPONSE_HEADER, (void*)codestr, (ULONG_PTR)hdr.c_str(), 0);
     char buf[1024];
     while (in) {
         in.read(buf,1024);
@@ -572,12 +525,12 @@ public:
     string hdr=string("Location: ") + url + "\r\n"
       "Content-Type: text/html\r\n"
       "Content-Length: 40\r\n"
-      "Expires: 01-Jan-1997 12:00:00 GMT\r\n"
-      "Cache-Control: private,no-store,no-cache\r\n";
-    for (multimap<string,string>::const_iterator i=m_headers.begin(); i!=m_headers.end(); ++i)
+      "Expires: Wed, 01 Jan 1997 12:00:00 GMT\r\n"
+      "Cache-Control: private,no-store,no-cache,max-age=0\r\n";
+    for (multimap<string,string>::const_iterator i = m_headers.begin(); i != m_headers.end(); ++i)
         hdr += i->first + ": " + i->second + "\r\n";
     hdr += "\r\n";
-    m_pfc->ServerSupportFunction(m_pfc, SF_REQ_SEND_RESPONSE_HEADER, "302 Please Wait", (DWORD)hdr.c_str(), 0);
+    m_pfc->ServerSupportFunction(m_pfc, SF_REQ_SEND_RESPONSE_HEADER, "302 Please Wait", (ULONG_PTR)hdr.c_str(), 0);
     static const char* redmsg="<HTML><BODY>Redirecting...</BODY></HTML>";
     DWORD resplen=40;
     m_pfc->WriteClient(m_pfc, (LPVOID)redmsg, &resplen, 0);
@@ -597,13 +550,47 @@ public:
   // The filter never processes the POST, so stub these methods.
   long getContentLength() const { throw IOException("The request's Content-Length is not available to an ISAPI filter."); }
   const char* getRequestBody() const { throw IOException("The request body is not available to an ISAPI filter."); }
+
+  void GetServerVariable(LPSTR lpszVariable, dynabuf& s, DWORD size=80, bool bRequired=true) const {
+    s.reserve(size);
+    s.erase();
+    size=s.size();
+
+    while (!m_pfc->GetServerVariable(m_pfc,lpszVariable,s,&size)) {
+        // Grumble. Check the error.
+        DWORD e = GetLastError();
+        if (e == ERROR_INSUFFICIENT_BUFFER)
+            s.reserve(size);
+        else
+            break;
+    }
+    if (bRequired && s.empty())
+        log(SPRequest::SPError, string("missing required server variable: ") + lpszVariable);
+  }
+
+  void GetHeader(LPSTR lpszName, dynabuf& s, DWORD size=80, bool bRequired=true) const {
+    s.reserve(size);
+    s.erase();
+    size=s.size();
+
+    while (!m_pn->GetHeader(m_pfc,lpszName,s,&size)) {
+        // Grumble. Check the error.
+        DWORD e = GetLastError();
+        if (e == ERROR_INSUFFICIENT_BUFFER)
+            s.reserve(size);
+        else
+            break;
+    }
+    if (bRequired && s.empty())
+        log(SPRequest::SPError, string("missing required header: ") + lpszName);
+  }
 };
 
 DWORD WriteClientError(PHTTP_FILTER_CONTEXT pfc, const char* msg)
 {
     LogEvent(nullptr, EVENTLOG_ERROR_TYPE, 2100, nullptr, msg);
     static const char* ctype="Connection: close\r\nContent-Type: text/html\r\n\r\n";
-    pfc->ServerSupportFunction(pfc,SF_REQ_SEND_RESPONSE_HEADER,"200 OK",(DWORD)ctype,0);
+    pfc->ServerSupportFunction(pfc,SF_REQ_SEND_RESPONSE_HEADER,"200 OK",(ULONG_PTR)ctype,0);
     static const char* xmsg="<HTML><HEAD><TITLE>Shibboleth Filter Error</TITLE></HEAD><BODY>"
                             "<H1>Shibboleth Filter Error</H1>";
     DWORD resplen=strlen(xmsg);
@@ -616,40 +603,60 @@ DWORD WriteClientError(PHTTP_FILTER_CONTEXT pfc, const char* msg)
     return SF_STATUS_REQ_FINISHED;
 }
 
+void GetServerVariable(PHTTP_FILTER_CONTEXT pfc, LPSTR lpszVariable, dynabuf& s, DWORD size=80, bool bRequired=true)
+{
+    s.reserve(size);
+    s.erase();
+    size=s.size();
+
+    while (!pfc->GetServerVariable(pfc,lpszVariable,s,&size)) {
+        // Grumble. Check the error.
+        DWORD e=GetLastError();
+        if (e==ERROR_INSUFFICIENT_BUFFER)
+            s.reserve(size);
+        else
+            break;
+    }
+    if (bRequired && s.empty()) {
+        string msg = string("Missing required server variable: ") + lpszVariable;
+        LogEvent(nullptr, EVENTLOG_ERROR_TYPE, 2100, nullptr, msg.c_str());
+    }
+}
+
+
 extern "C" DWORD WINAPI HttpFilterProc(PHTTP_FILTER_CONTEXT pfc, DWORD notificationType, LPVOID pvNotification)
 {
     // Is this a log notification?
-    if (notificationType==SF_NOTIFY_LOG) {
+    if (notificationType == SF_NOTIFY_LOG) {
         if (pfc->pFilterContext)
-        	((PHTTP_FILTER_LOG)pvNotification)->pszClientUserName=reinterpret_cast<char*>(pfc->pFilterContext);
+        	((PHTTP_FILTER_LOG)pvNotification)->pszClientUserName = reinterpret_cast<char*>(pfc->pFilterContext);
         return SF_STATUS_REQ_NEXT_NOTIFICATION;
     }
 
     PHTTP_FILTER_PREPROC_HEADERS pn=(PHTTP_FILTER_PREPROC_HEADERS)pvNotification;
-    try
-    {
+    try {
         // Determine web site number. This can't really fail, I don't think.
         dynabuf buf(128);
         GetServerVariable(pfc,"INSTANCE_ID",buf,10);
+        if (buf.empty())
+            return WriteClientError(pfc, "Shibboleth Filter failed to obtain INSTANCE_ID server variable.");
 
         // Match site instance to host name, skip if no match.
-        map<string,site_t>::const_iterator map_i=g_Sites.find(static_cast<char*>(buf));
-        if (map_i==g_Sites.end())
+        map<string,site_t>::const_iterator map_i = g_Sites.find(static_cast<char*>(buf));
+        if (map_i == g_Sites.end())
             return SF_STATUS_REQ_NEXT_NOTIFICATION;
 
-        ostringstream threadid;
-        threadid << "[" << getpid() << "] isapi_shib" << '\0';
-        xmltooling::NDC ndc(threadid.str().c_str());
+        string threadid("[");
+        threadid += lexical_cast<string>(getpid()) + "] isapi_shib";
+        xmltooling::NDC ndc(threadid.c_str());
 
         ShibTargetIsapiF stf(pfc, pn, map_i->second);
 
-        // "false" because we don't override the Shib settings
         pair<bool,long> res = stf.getServiceProvider().doAuthentication(stf);
         if (!g_spoofKey.empty())
             pn->SetHeader(pfc, "ShibSpoofCheck:", const_cast<char*>(g_spoofKey.c_str()));
         if (res.first) return res.second;
 
-        // "false" because we don't override the Shib settings
         res = stf.getServiceProvider().doExport(stf);
         if (res.first) return res.second;
 
@@ -659,26 +666,26 @@ extern "C" DWORD WINAPI HttpFilterProc(PHTTP_FILTER_CONTEXT pfc, DWORD notificat
         return SF_STATUS_REQ_NEXT_NOTIFICATION;
     }
     catch(bad_alloc) {
-        return WriteClientError(pfc,"Out of Memory");
+        return WriteClientError(pfc, "Out of Memory");
     }
     catch(long e) {
         if (e==ERROR_NO_DATA)
-            return WriteClientError(pfc,"A required variable or header was empty.");
+            return WriteClientError(pfc, "A required variable or header was empty.");
         else
-            return WriteClientError(pfc,"Shibboleth Filter detected unexpected IIS error.");
+            return WriteClientError(pfc, "Shibboleth Filter detected unexpected IIS error.");
     }
-    catch (exception& e) {
+    catch (std::exception& e) {
         LogEvent(nullptr, EVENTLOG_ERROR_TYPE, 2100, nullptr, e.what());
-        return WriteClientError(pfc,"Shibboleth Filter caught an exception, check Event Log for details.");
+        return WriteClientError(pfc, "Shibboleth Filter caught an exception, check Event Log for details.");
     }
     catch(...) {
         LogEvent(nullptr, EVENTLOG_ERROR_TYPE, 2100, nullptr, "Shibboleth Filter threw an unknown exception.");
         if (g_catchAll)
-            return WriteClientError(pfc,"Shibboleth Filter threw an unknown exception.");
+            return WriteClientError(pfc, "Shibboleth Filter threw an unknown exception.");
         throw;
     }
 
-    return WriteClientError(pfc,"Shibboleth Filter reached unreachable code, save my walrus!");
+    return WriteClientError(pfc, "Shibboleth Filter reached unreachable code, save my walrus!");
 }
 
 
@@ -717,39 +724,47 @@ public:
   ShibTargetIsapiE(LPEXTENSION_CONTROL_BLOCK lpECB, const site_t& site)
       : AbstractSPRequest(SHIBSP_LOGCAT".ISAPI"), m_lpECB(lpECB), m_gotBody(false) {
     dynabuf ssl(5);
-    GetServerVariable(lpECB,"HTTPS",ssl,5);
+    GetServerVariable("HTTPS",ssl,5);
     bool SSL=(ssl=="on" || ssl=="ON");
 
     // Scheme may come from site def or be derived from IIS.
-    m_scheme=site.m_scheme;
+    m_scheme = site.m_scheme;
     if (m_scheme.empty() || !g_bNormalizeRequest)
         m_scheme = SSL ? "https" : "http";
 
     // URL path always come from IIS.
     dynabuf url(256);
-    GetServerVariable(lpECB,"URL",url,255);
+    GetServerVariable("URL",url,255);
 
     // Port may come from IIS or from site def.
-    dynabuf port(11);
-    if (!g_bNormalizeRequest || (SSL && site.m_sslport.empty()) || (!SSL && site.m_port.empty()))
-        GetServerVariable(lpECB,"SERVER_PORT",port,10);
+    if (!g_bNormalizeRequest || (SSL && site.m_sslport.empty()) || (!SSL && site.m_port.empty())) {
+        dynabuf port(11);
+        GetServerVariable("SERVER_PORT",port,10);
+        if (port.empty()) {
+            m_port = SSL ? 443 : 80;
+        }
+        else {
+            m_port = atoi(port);
+        }
+    }
     else if (SSL) {
-        strncpy(port,site.m_sslport.c_str(),10);
-        static_cast<char*>(port)[10]=0;
+        m_port = atoi(site.m_sslport.c_str());
     }
     else {
-        strncpy(port,site.m_port.c_str(),10);
-        static_cast<char*>(port)[10]=0;
+        m_port = atoi(site.m_port.c_str());
     }
-    m_port = atoi(port);
 
     dynabuf var(32);
-    GetServerVariable(lpECB, "SERVER_NAME", var, 32);
-
-    // Make sure SERVER_NAME is "authorized" for use on this site. If not, set to canonical name.
-    m_hostname=var;
-    if (site.m_name!=m_hostname && site.m_aliases.find(m_hostname)==site.m_aliases.end())
-        m_hostname=site.m_name;
+    GetServerVariable("SERVER_NAME", var, 32);
+    if (var.empty()) {
+        m_hostname = site.m_name;
+    }
+    else {
+        // Make sure SERVER_NAME is "authorized" for use on this site. If not, set to canonical name.
+        m_hostname=var;
+        if (site.m_name != m_hostname && site.m_aliases.find(m_hostname) == site.m_aliases.end())
+            m_hostname = site.m_name;
+    }
 
     /*
      * IIS screws us over on PATH_INFO (the hits keep on coming). We need to figure out if
@@ -776,11 +791,12 @@ public:
             // Pretty good chance we're in bad mode, unless the PathInfo repeats the path itself.
             uri = lpECB->lpszPathInfo;
         else {
-            uri = url;
+            if (!url.empty())
+                uri = url;
             uri += lpECB->lpszPathInfo;
         }
     }
-    else {
+    else if (!url.empty()) {
         uri = url;
     }
 
@@ -792,7 +808,7 @@ public:
 
     setRequestURI(uri.c_str());
   }
-  ~ShibTargetIsapiE() { }
+  ~ShibTargetIsapiE() {}
 
   const char* getScheme() const {
     return m_scheme.c_str();
@@ -815,7 +831,7 @@ public:
   string getRemoteUser() const {
     if (m_remote_user.empty()) {
         dynabuf var(16);
-        GetServerVariable(m_lpECB, "REMOTE_USER", var, 32, false);
+        GetServerVariable("REMOTE_USER", var, 32, false);
         if (!var.empty())
             m_remote_user = var;
     }
@@ -825,7 +841,7 @@ public:
     m_remote_addr = AbstractSPRequest::getRemoteAddr();
     if (m_remote_addr.empty()) {
         dynabuf var(16);
-        GetServerVariable(m_lpECB, "REMOTE_ADDR", var, 16, false);
+        GetServerVariable("REMOTE_ADDR", var, 16, false);
         if (!var.empty())
             m_remote_addr = var;
     }
@@ -839,13 +855,13 @@ public:
   string getHeader(const char* name) const {
     string hdr("HTTP_");
     for (; *name; ++name) {
-        if (*name=='-')
+        if (*name == '-')
             hdr += '_';
         else
             hdr += toupper(*name);
     }
     dynabuf buf(128);
-    GetServerVariable(m_lpECB, const_cast<char*>(hdr.c_str()), buf, 128, false);
+    GetServerVariable(const_cast<char*>(hdr.c_str()), buf, 128, false);
     return buf.empty() ? "" : buf;
   }
   void setResponseHeader(const char* name, const char* value) {
@@ -894,7 +910,7 @@ public:
   }
   long sendResponse(istream& in, long status) {
     string hdr = string("Connection: close\r\n");
-    for (multimap<string,string>::const_iterator i=m_headers.begin(); i!=m_headers.end(); ++i)
+    for (multimap<string,string>::const_iterator i = m_headers.begin(); i != m_headers.end(); ++i)
         hdr += i->first + ": " + i->second + "\r\n";
     hdr += "\r\n";
     const char* codestr="200 OK";
@@ -919,9 +935,9 @@ public:
     string hdr=string("Location: ") + url + "\r\n"
       "Content-Type: text/html\r\n"
       "Content-Length: 40\r\n"
-      "Expires: 01-Jan-1997 12:00:00 GMT\r\n"
-      "Cache-Control: private,no-store,no-cache\r\n";
-    for (multimap<string,string>::const_iterator i=m_headers.begin(); i!=m_headers.end(); ++i)
+      "Expires: Wed, 01 Jan 1997 12:00:00 GMT\r\n"
+      "Cache-Control: private,no-store,no-cache,max-age=0\r\n";
+    for (multimap<string,string>::const_iterator i = m_headers.begin(); i != m_headers.end(); ++i)
         hdr += i->first + ": " + i->second + "\r\n";
     hdr += "\r\n";
     m_lpECB->ServerSupportFunction(m_lpECB->ConnID, HSE_REQ_SEND_RESPONSE_HEADER, "302 Moved", 0, (LPDWORD)hdr.c_str());
@@ -930,7 +946,7 @@ public:
     m_lpECB->WriteClient(m_lpECB->ConnID, (LPVOID)redmsg, &resplen, HSE_IO_SYNC);
     return HSE_STATUS_SUCCESS;
   }
-  // Decline happens in the POST processor if this isn't the shire url
+  // Decline happens in the POST processor if this isn't the handler url
   // Note that it can also happen with HTAccess, but we don't support that, yet.
   long returnDecline() {
     return WriteClientError(
@@ -971,22 +987,61 @@ public:
   void clearHeader(const char* rawname, const char* cginame) { throw runtime_error("clearHeader not implemented"); }
   void setHeader(const char* name, const char* value) { throw runtime_error("setHeader not implemented"); }
   void setRemoteUser(const char* user) { throw runtime_error("setRemoteUser not implemented"); }
+
+  void GetServerVariable(LPSTR lpszVariable, dynabuf& s, DWORD size=80, bool bRequired=true) const {
+    s.reserve(size);
+    s.erase();
+    size=s.size();
+
+    while (!m_lpECB->GetServerVariable(m_lpECB->ConnID,lpszVariable,s,&size)) {
+        // Grumble. Check the error.
+        DWORD e=GetLastError();
+        if (e==ERROR_INSUFFICIENT_BUFFER)
+            s.reserve(size);
+        else
+            break;
+    }
+    if (bRequired && s.empty())
+        log(SPRequest::SPError, string("missing required server variable: ") + lpszVariable);
+  }
 };
+
+void GetServerVariable(LPEXTENSION_CONTROL_BLOCK lpECB, LPSTR lpszVariable, dynabuf& s, DWORD size=80, bool bRequired=true)
+{
+    s.reserve(size);
+    s.erase();
+    size=s.size();
+
+    while (!lpECB->GetServerVariable(lpECB->ConnID,lpszVariable,s,&size)) {
+        // Grumble. Check the error.
+        DWORD e=GetLastError();
+        if (e==ERROR_INSUFFICIENT_BUFFER)
+            s.reserve(size);
+        else
+            break;
+    }
+    if (bRequired && s.empty()) {
+        string msg = string("Missing required server variable: ") + lpszVariable;
+        LogEvent(nullptr, EVENTLOG_ERROR_TYPE, 2100, nullptr, msg.c_str());
+    }
+}
 
 extern "C" DWORD WINAPI HttpExtensionProc(LPEXTENSION_CONTROL_BLOCK lpECB)
 {
     try {
-        ostringstream threadid;
-        threadid << "[" << getpid() << "] isapi_shib_extension" << '\0';
-        xmltooling::NDC ndc(threadid.str().c_str());
+        string threadid("[");
+        threadid += lexical_cast<string>(getpid()) + "] isapi_shib_extension";
+        xmltooling::NDC ndc(threadid.c_str());
 
         // Determine web site number. This can't really fail, I don't think.
         dynabuf buf(128);
         GetServerVariable(lpECB,"INSTANCE_ID",buf,10);
+        if (buf.empty())
+            return WriteClientError(lpECB, "Shibboleth Extension failed to obtain INSTANCE_ID server variable.");
 
         // Match site instance to host name, skip if no match.
-        map<string,site_t>::const_iterator map_i=g_Sites.find(static_cast<char*>(buf));
-        if (map_i==g_Sites.end())
+        map<string,site_t>::const_iterator map_i = g_Sites.find(static_cast<char*>(buf));
+        if (map_i == g_Sites.end())
             return WriteClientError(lpECB, "Shibboleth Extension not configured for web site (check ISAPI mappings in SP configuration).");
 
         ShibTargetIsapiE ste(lpECB, map_i->second);
@@ -997,22 +1052,22 @@ extern "C" DWORD WINAPI HttpExtensionProc(LPEXTENSION_CONTROL_BLOCK lpECB)
 
     }
     catch(bad_alloc) {
-        return WriteClientError(lpECB,"Out of Memory");
+        return WriteClientError(lpECB, "Out of Memory");
     }
     catch(long e) {
         if (e==ERROR_NO_DATA)
-            return WriteClientError(lpECB,"A required variable or header was empty.");
+            return WriteClientError(lpECB, "A required variable or header was empty.");
         else
-            return WriteClientError(lpECB,"Server detected unexpected IIS error.");
+            return WriteClientError(lpECB, "Server detected unexpected IIS error.");
     }
-    catch (exception& e) {
+    catch (std::exception& e) {
         LogEvent(nullptr, EVENTLOG_ERROR_TYPE, 2100, nullptr, e.what());
-        return WriteClientError(lpECB,"Shibboleth Extension caught an exception, check Event Log for details.");
+        return WriteClientError(lpECB, "Shibboleth Extension caught an exception, check Event Log for details.");
     }
     catch(...) {
         LogEvent(nullptr, EVENTLOG_ERROR_TYPE, 2100, nullptr, "Shibboleth Extension threw an unknown exception.");
         if (g_catchAll)
-            return WriteClientError(lpECB,"Shibboleth Extension threw an unknown exception.");
+            return WriteClientError(lpECB, "Shibboleth Extension threw an unknown exception.");
         throw;
     }
 

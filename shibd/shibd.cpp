@@ -19,7 +19,7 @@
  */
 
 /*
- * shibd.cpp -- the shibd "main" code.  All the functionality is elsewhere
+ * shibd.cpp -- the shibd "main" code.
  */
 
 
@@ -38,8 +38,13 @@
 #include <shibsp/SPConfig.h>
 
 #ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#include <sys/select.h>
+# include <unistd.h>
+# include <sys/select.h>
+#endif
+
+#if defined(HAVE_GRP_H) && defined(HAVE_PWD_H)
+# include <pwd.h>
+# include <grp.h>
 #endif
 
 #include <stdio.h>
@@ -105,9 +110,14 @@ int MyAllocHook(int nAllocType, void *pvData,
 
 int real_main(int preinit)
 {
-    SPConfig& conf=SPConfig::getConfig();
-    if (preinit) {
+    if (shar_version) {
+        if (preinit)
+            fprintf(stdout, PACKAGE_STRING"\n");
+        return 0;
+    }
 
+    SPConfig& conf = SPConfig::getConfig();
+    if (preinit) {
         // Initialize the SP library.
         conf.setFeatures(
             SPConfig::Listener |
@@ -168,6 +178,8 @@ int real_main(int preinit)
 int daemon_wait = 3;
 bool shibd_running = false;
 bool daemonize = true;
+const char* runasuser = nullptr;
+const char* runasgroup = nullptr;
 
 static void term_handler(int arg)
 {
@@ -233,17 +245,19 @@ static int setup_signals(void)
 
 static void usage(char* whoami)
 {
-    fprintf(stderr, "usage: %s [-dcxtfpvh]\n", whoami);
-    fprintf(stderr, "  -d\tinstallation prefix to use.\n");
-    fprintf(stderr, "  -c\tconfig file to use.\n");
-    fprintf(stderr, "  -x\tXML schema catalogs to use.\n");
-    fprintf(stderr, "  -t\ttest configuration file for problems.\n");
-    fprintf(stderr, "  -f\tforce removal of listener socket.\n");
-    fprintf(stderr, "  -F\tstay in the foreground.\n");
-    fprintf(stderr, "  -p\tpid file to use.\n");
-    fprintf(stderr, "  -w\tseconds to wait for successful daemonization.\n");
-    fprintf(stderr, "  -v\tprint software version.\n");
-    fprintf(stderr, "  -h\tprint this help message.\n");
+    fprintf(stderr, "usage: %s [-dcxtfFpwugvh]\n", whoami);
+    fprintf(stderr, "  -d\tinstallation prefix to use\n");
+    fprintf(stderr, "  -c\tconfig file to use\n");
+    fprintf(stderr, "  -x\tXML schema catalogs to use\n");
+    fprintf(stderr, "  -t\ttest configuration file for problems\n");
+    fprintf(stderr, "  -f\tforce removal of listener socket\n");
+    fprintf(stderr, "  -F\tstay in the foreground\n");
+    fprintf(stderr, "  -p\tpid file to use\n");
+    fprintf(stderr, "  -w\tseconds to wait for successful daemonization\n");
+    fprintf(stderr, "  -u\tuser to run under\n");
+    fprintf(stderr, "  -g\tgroup to run under\n");
+    fprintf(stderr, "  -v\tprint software version\n");
+    fprintf(stderr, "  -h\tprint this help message\n");
     exit(1);
 }
 
@@ -251,7 +265,7 @@ static int parse_args(int argc, char* argv[])
 {
     int opt;
 
-    while ((opt = getopt(argc, argv, "d:c:x:p:w:fFtvh")) > 0) {
+    while ((opt = getopt(argc, argv, "d:c:x:p:w:u:g:fFtvh")) > 0) {
         switch (opt) {
             case 'd':
                 shar_prefix=optarg;
@@ -284,6 +298,14 @@ static int parse_args(int argc, char* argv[])
                 if (daemon_wait <= 0)
                     daemon_wait = 3;
                 break;
+            case 'u':
+                if (optarg)
+                    runasuser = optarg;
+                break;
+            case 'g':
+                if (optarg)
+                    runasgroup = optarg;
+                break;
             default:
                 return -1;
         }
@@ -302,6 +324,40 @@ int main(int argc, char *argv[])
 
     if (setup_signals() != 0)
         return -1;
+
+    if (runasgroup) {
+#ifdef HAVE_GETGRNAM
+        struct group* grp = getgrnam(runasgroup);
+        if (!grp) {
+            fprintf(stderr, "getgrnam failed, check -g option\n");
+            return -1;
+        }
+        if (setgid(grp->gr_gid) != 0) {
+            fprintf(stderr, "setgid failed, check -g option\n");
+            return -1;
+        }
+#else
+        fprintf(stderr, "-g not supported on this platform");
+        return -1;
+#endif
+    }
+
+    if (runasuser) {
+#ifdef HAVE_GETPWNAM
+        struct passwd* pwd = getpwnam(runasuser);
+        if (!pwd) {
+            fprintf(stderr, "getpwnam failed, check -u option\n");
+            return -1;
+        }
+        if (setuid(pwd->pw_uid) != 0) {
+            fprintf(stderr, "setuid failed, check -u option\n");
+            return -1;
+        }
+#else
+        fprintf(stderr, "-u not supported on this platform");
+        return -1;
+#endif
+    }
 
     // initialize the shib-target library
     SPConfig& conf=SPConfig::getConfig();

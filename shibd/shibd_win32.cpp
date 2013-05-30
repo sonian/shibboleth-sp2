@@ -38,6 +38,7 @@ extern const char* shar_schemadir;
 extern const char* shar_config;
 extern const char* shar_prefix;
 extern bool shar_checkonly;
+extern bool shar_version;
 
 // internal variables
 SERVICE_STATUS          ssStatus;       // current status of the service
@@ -47,6 +48,8 @@ BOOL                    bConsole = FALSE;
 char                    szErr[256];
 LPCSTR                  lpszInstall = nullptr;
 LPCSTR                  lpszRemove = nullptr;
+LPCSTR                  lpszStdout = nullptr;
+LPCSTR                  lpszStderr = nullptr;
 
 // internal function prototypes
 VOID WINAPI service_ctrl(DWORD dwCtrlCode);
@@ -80,7 +83,7 @@ BOOL WINAPI BreakHandler(DWORD dwCtrlType)
 }
 
 
-int real_main(int);  // The revised two-phase main() in shar.cpp
+int real_main(int);  // The revised two-phase main() in shibd.cpp
 
 int main(int argc, char *argv[])
 {
@@ -97,6 +100,20 @@ int main(int argc, char *argv[])
             if (argc > ++i)
                 lpszRemove = argv[i++];
         }
+        else if (_stricmp("stdout", argv[i]+1) == 0)
+        {
+            if (argc > ++i) {
+                lpszStdout = argv[i++];
+                freopen(lpszStdout, "a+", stdout);
+            }
+        }
+        else if (_stricmp("stderr", argv[i]+1) == 0)
+        {
+            if (argc > ++i) {
+                lpszStderr = argv[i++];
+                freopen(lpszStderr, "a+", stderr);
+            }
+        }
         else if (_stricmp( "console", argv[i]+1) == 0)
         {
             i++;
@@ -106,7 +123,13 @@ int main(int argc, char *argv[])
         {
             i++;
             bConsole = TRUE;
-            shar_checkonly=true;
+            shar_checkonly = true;
+        }
+        else if (_stricmp( "version", argv[i]+1) == 0)
+        {
+            i++;
+            bConsole = TRUE;
+            shar_version = true;
         }
         else if (_stricmp( "config", argv[i]+1) == 0)
         {
@@ -161,6 +184,9 @@ int main(int argc, char *argv[])
         printf("%s -remove <name>    to remove the named service\n", argv[0]);
         printf("%s -console          to run as a console app for debugging\n", argv[0]);
         printf("%s -check            to run as a console app and check configuration\n", argv[0]);
+        printf("%s -version          to run as a console app and print the version\n", argv[0]);
+        printf("\t-stdout <path> to redirect stdout stream\n");
+        printf("\t-stderr <path> to redirect stderr stream\n");
         printf("\t-prefix <dir> to specify the installation directory\n");
         printf("\t-config <file> to specify the config file to use\n");
         printf("\t-catalogs <catalog1:catalog2> to specify schema catalogs\n");
@@ -369,6 +395,10 @@ void CmdInstallService(LPCSTR name)
         cmd = cmd + " -config " + shar_config;
     if (shar_schemadir)
         cmd = cmd + " -schemadir " + shar_schemadir;
+    if (lpszStdout)
+        cmd = cmd + " -stdout " + lpszStdout;
+    if (lpszStderr)
+        cmd = cmd + " -stderr " + lpszStderr;
 
     schSCManager = OpenSCManager(
                         nullptr,                   // machine (nullptr == local)

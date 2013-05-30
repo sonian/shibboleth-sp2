@@ -1,64 +1,59 @@
-Shibboleth Implementation Team
-
- Documentation
-
-   Nate Klingenstein
-   Internet2
-   ndk@internet2.edu
-
- Design and Programming
-
-   Derek Atkins
-   IHTFP Consulting, Inc
-   derek@ihtfp.com
+ Current Development Team
 
    Scott Cantor
    The Ohio State University
-   cantor.2@osu.edu
 
-   Jim Fox
-   University of Washington
-   fox@washington.edu
-
-   Walter Hoehn
-   The University of Memphis
-   wassa@memphis.edu
-
-   Chad LaJoie
-   Itumi, LLC.
-   lajoie@itumi.biz
-
-   Derek Morr
-   Penn State University
-   dvm105@psu.edu
-
-   Will Norris
-   will@willnorris.com
-   
    Brent Putman
    Georgetown University
-   putmanb@georgetown.edu
    
    Rod Widdowson
-   Steading Software, Inc.
-   rdw@steadingsoftware.com
+   Steading System Software LLP
+
+   Ian Young
+   Independent
+
+   Tom Zeller
+   Dragonacea, LLC
    
  Project Management
 
-   RL "Bob" Morgan
-   University of Washington
-   rlmorgan@washington.edu
+   Nicole Harris
+   JISC Advance
+
+ Emeritus Developers
+
+   Derek Atkins
+
+   Jim Fox
+
+   Walter Hoehn
+
+   Chad LaJoie
+
+   Derek Morr
+
+   Will Norris
+  
+ Emeritus Contributors
 
    Steven Carmody
    Brown University
-   Steven_Carmody@brown.edu
+
+   Marlena Erdos
 
    Ken Klingenstein
    Internet2
-   kjk@internet2.edu
 
+   Nate Klingenstein
+   Internet2
 
-Thanks to: 
+   RL "Bob" Morgan
+   University of Washington
+   http://shibboleth.net/community/news/20120717.html
+
+   Many others!
+   
+Additional thanks to:
 
     Internet2
 
@@ -68,14 +63,14 @@ Thanks to:
 
     Barbara Jenson (CMU), Parviz Dousti (CMU), Tom Dopirak (CMU), 
       and Sridhar Muppidi (IBM/Tivoli); for helping to develop 
-      the initial shibboleth prototype
+      the initial Shibboleth prototype
 
     Brian Pittman (WebAssign), Mark Earnest (PSU), James Shvarts (Columbia), 
       Ryan Muldoon (Wisconsin), John Hopkins (PSU), Noah Levitt (Columbia), 
       and David Walker (UCOP); for much help with testing
       
     Dave Dearman (NRCC), for contributing a SQL Data Connector for the AA 
-      resolver
+      resolver back in the 1.x release
 
     Noah Levitt (Columbia), for simplifying the  logging configuration.
 
@@ -88,3 +83,7 @@ Thanks to:
       Shibboleth versions
     
     Kaspar Brand for assisting in the development of CRL-related functionality
+
+    The community at large for helping with end user support, particularly
+      Peter Schober, Paul Hethmon, Kevin Foote, Russell Beall, and Christopher
+      Bongaarts

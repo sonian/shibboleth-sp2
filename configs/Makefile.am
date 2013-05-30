@@ -1,14 +1,15 @@
-## $Id: Makefile.am 3293 2010-08-13 04:23:23Z cantor $ 
+## $Id: Makefile.am 3779 2012-10-09 20:04:57Z scantor $ 
 
 AUTOMAKE_OPTIONS = foreign
 
-pkglibdir = ${libdir}/@PACKAGE@
-pkglogdir = ${localstatedir}/log/@PACKAGE@
-pkgdocdir = $(datadir)/doc/@PACKAGE@-@PACKAGE_VERSION@
+pkglibdir = ${libdir}/@PACKAGE_NAME@
+pkglogdir = ${localstatedir}/log/@PACKAGE_NAME@
 shirelogdir = ${localstatedir}/log/httpd
-pkgxmldir = $(datadir)/xml/@PACKAGE@
-pkgrundir = $(localstatedir)/run/@PACKAGE@
-pkgsysconfdir = $(sysconfdir)/@PACKAGE@
+pkgxmldir = $(datadir)/xml/@PACKAGE_NAME@
+pkgwebdir = $(datadir)/@PACKAGE_NAME@
+pkgrundir = $(localstatedir)/run/@PACKAGE_NAME@
+pkgcachedir = $(localstatedir)/cache/@PACKAGE_NAME@
+pkgsysconfdir = $(sysconfdir)/@PACKAGE_NAME@
 pkgsysconf_DATA = \
 	shibd-redhat \
 	shibd-suse \
@@ -17,6 +18,7 @@ pkgsysconf_DATA = \
 	apache.config \
 	apache2.config \
 	apache22.config \
+	apache24.config \
 	keygen.sh \
 	metagen.sh \
 	upgrade.xsl
@@ -42,11 +44,12 @@ CONFIGFILES = \
 	console.logger \
 	syslog.logger \
 	accessError.html \
+	attrChecker.html \
 	sessionError.html \
 	metadataError.html \
 	bindingTemplate.html \
 	discoveryTemplate.html \
-    postTemplate.html \
+	postTemplate.html \
 	localLogout.html \
 	globalLogout.html \
 	partialLogout.html \
@@ -58,14 +61,14 @@ CONFIGFILES = \
 do-build-file:
 	rm -f ${FILE}.tmp
 	sed < ${srcdir}/${FILE}.in > ${FILE}.tmp \
-        -e 's:@-PREFIX-@:${prefix}:g' \
-        -e 's:@-PKGLIBDIR-@:${pkglibdir}:g' \
-        -e 's:@-PKGSYSCONFDIR-@:${pkgsysconfdir}:g' \
-        -e 's:@-PKGDOCDIR-@:${pkgdocdir}:g' \
-        -e 's:@-PKGXMLDIR-@:${pkgxmldir}:g' \
-        -e 's:@-PKGLOGDIR-@:${pkglogdir}:g' \
-        -e 's:@-SHIRELOGDIR-@:${shirelogdir}:g' \
-        -e 's:@-PKGRUNDIR-@:${pkgrundir}:g'
+		-e 's:@-PREFIX-@:${prefix}:g' \
+		-e 's:@-PKGLIBDIR-@:${pkglibdir}:g' \
+		-e 's:@-PKGSYSCONFDIR-@:${pkgsysconfdir}:g' \
+		-e 's:@-PKGXMLDIR-@:${pkgxmldir}:g' \
+		-e 's:@-PKGWEBDIR-@:${pkgwebdir}:g' \
+		-e 's:@-PKGLOGDIR-@:${pkglogdir}:g' \
+		-e 's:@-SHIRELOGDIR-@:${shirelogdir}:g' \
+		-e 's:@-PKGRUNDIR-@:${pkgrundir}:g'
 	cmp -s ${FILE} ${FILE}.tmp || mv ${FILE}.tmp ${FILE}
 	rm -f ${FILE}.tmp
 
@@ -76,6 +79,9 @@ apache2.config: ${srcdir}/apache2.config.in Makefile ${top_builddir}/config.stat
 	$(MAKE) do-build-file FILE=$@
 
 apache22.config: ${srcdir}/apache22.config.in Makefile ${top_builddir}/config.status
+	$(MAKE) do-build-file FILE=$@
+
+apache24.config: ${srcdir}/apache24.config.in Makefile ${top_builddir}/config.status
 	$(MAKE) do-build-file FILE=$@
 
 shibd-redhat: ${srcdir}/shibd-redhat.in Makefile ${top_builddir}/config.status
@@ -100,9 +106,9 @@ all-data-local: $(BUILTCONFIGFILES)
 
 install-data-local:	all-data-local
 	$(mkinstalldirs) $(DESTDIR)$(pkglogdir)
-	$(mkinstalldirs) $(DESTDIR)$(pkgdocdir)
 	$(mkinstalldirs) $(DESTDIR)$(shirelogdir)
 	$(mkinstalldirs) $(DESTDIR)$(pkgrundir)
+	$(mkinstalldirs) $(DESTDIR)$(pkgcachedir)
 	$(mkinstalldirs) $(DESTDIR)$(pkgxmldir)
 	$(mkinstalldirs) $(DESTDIR)$(pkgsysconfdir)
 	for f in $(BUILTCONFIGFILES); do \
@@ -130,6 +136,7 @@ CLEANFILES = \
 	apache.config \
 	apache2.config \
 	apache22.config \
+	apache24.config \
 	shibd-redhat \
 	shibd-suse \
 	shibd-debian \
@@ -143,6 +150,7 @@ EXTRA_DIST = \
 	apache.config.in \
 	apache2.config.in \
 	apache22.config.in \
+	apache24.config.in \
 	shibd-redhat.in \
 	shibd-suse.in \
 	shibd-debian.in \
@@ -150,6 +158,8 @@ EXTRA_DIST = \
 	keygen.bat \
 	keygen.sh \
 	metagen.sh \
+	SetService32.bat \
+	SetService64.bat \
 	upgrade.xsl \
 	xsltproc.js \
 	$(CONFIGFILES)

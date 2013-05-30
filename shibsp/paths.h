@@ -28,30 +28,27 @@
 #define __shibsp_paths_h__
 
 /** Default schema catalogs. */
-#define SHIBSP_SCHEMAS "/opt/shibboleth-svn/share/xml/xmltooling/catalog.xml:/opt/shibboleth-svn/share/xml/opensaml/saml20-catalog.xml:/opt/shibboleth-svn/share/xml/opensaml/saml11-catalog.xml:/opt/shibboleth-svn/share/xml/shibboleth/catalog.xml"
-
-/** Default name of SP configuration file. */
-#define SHIBSP_CONFIG "shibboleth2.xml"
-
-/** Default name of SP console tool logging file. */
-#define SHIBSP_LOGGING "console.logger"
+#define SHIBSP_SCHEMAS  "/home/scantor/opt/shibboleth-sp/share/xml/xmltooling/catalog.xml:/home/scantor/opt/shibboleth-sp/share/xml/opensaml/saml20-catalog.xml:/home/scantor/opt/shibboleth-sp/share/xml/opensaml/saml11-catalog.xml:/home/scantor/opt/shibboleth-sp/share/xml/shibboleth/catalog.xml"
 
 /** Default prefix for installation (used to resolve relative paths). */
-#define SHIBSP_PREFIX  "/opt/shibboleth-svn"
+#define SHIBSP_PREFIX   "/home/scantor/opt/shibboleth-sp"
 
 /** Library directory for installation (used to resolve relative paths). */
-#define SHIBSP_LIBDIR  "/opt/shibboleth-svn/lib"
+#define SHIBSP_LIBDIR   "/home/scantor/opt/shibboleth-sp/lib"
 
 /** Log directory for installation (used to resolve relative paths). */
-#define SHIBSP_LOGDIR  "/opt/shibboleth-svn/var/log"
+#define SHIBSP_LOGDIR   "/home/scantor/opt/shibboleth-sp/var/log"
 
 /** Configuration directory for installation (used to resolve relative paths). */
-#define SHIBSP_CFGDIR  "/opt/shibboleth-svn/etc"
+#define SHIBSP_CFGDIR   "/home/scantor/opt/shibboleth-sp/etc"
 
 /** Runtime state directory for installation (used to resolve relative paths). */
-#define SHIBSP_RUNDIR  "/opt/shibboleth-svn/var/run"
+#define SHIBSP_RUNDIR   "/home/scantor/opt/shibboleth-sp/var/run"
+
+/** Cache directory for installation (used to resolve relative paths). */
+#define SHIBSP_CACHEDIR "/home/scantor/opt/shibboleth-sp/var/cache"
 
 /** XML directory for installation (used to resolve relative paths). */
-#define SHIBSP_XMLDIR  "/opt/shibboleth-svn/share/xml"
+#define SHIBSP_XMLDIR   "/home/scantor/opt/shibboleth-sp/share/xml"
 
 #endif /* __shibsp_paths_h__ */

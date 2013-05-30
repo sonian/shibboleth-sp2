@@ -1,5 +1,29 @@
 /* config.h.in.  Generated from configure.ac by autoheader.  */
 
+/* Defined if the requested minimum BOOST version is satisfied */
+#undef HAVE_BOOST
+
+/* Define to 1 if you have <boost/algorithm/string.hpp> */
+#undef HAVE_BOOST_ALGORITHM_STRING_HPP
+
+/* Define to 1 if you have <boost/bind.hpp> */
+#undef HAVE_BOOST_BIND_HPP
+
+/* Define to 1 if you have <boost/lambda/lambda.hpp> */
+#undef HAVE_BOOST_LAMBDA_LAMBDA_HPP
+
+/* Define to 1 if you have <boost/ptr_container/ptr_vector.hpp> */
+#undef HAVE_BOOST_PTR_CONTAINER_PTR_VECTOR_HPP
+
+/* Define to 1 if you have <boost/scoped_ptr.hpp> */
+#undef HAVE_BOOST_SCOPED_PTR_HPP
+
+/* Define to 1 if you have <boost/shared_ptr.hpp> */
+#undef HAVE_BOOST_SHARED_PTR_HPP
+
+/* Define to 1 if you have <boost/tuple/tuple.hpp> */
+#undef HAVE_BOOST_TUPLE_TUPLE_HPP
+
 /* Define if ctime_r is present with 2 parameters. */
 #undef HAVE_CTIME_R_2
 
@@ -13,8 +37,17 @@
 /* Define to 1 if you have the <dlfcn.h> header file. */
 #undef HAVE_DLFCN_H
 
+/* Define to 1 if you have the `getgrnam' function. */
+#undef HAVE_GETGRNAM
+
+/* Define to 1 if you have the `getpwnam' function. */
+#undef HAVE_GETPWNAM
+
 /* Define to 1 if you have the `gmtime_r' function. */
 #undef HAVE_GMTIME_R
+
+/* Define to 1 if you have the <grp.h> header file. */
+#undef HAVE_GRP_H
 
 /* Define to 1 if GSS-API composite name import is available. */
 #undef HAVE_GSSAPI_COMPOSITE_NAME
@@ -34,6 +67,12 @@
 /* Define to 1 if you have the <inttypes.h> header file. */
 #undef HAVE_INTTYPES_H
 
+/* Define to 1 if you have the `localtime_r' function. */
+#undef HAVE_LOCALTIME_R
+
+/* Define to 1 if libmemcached supports error handling function. */
+#undef HAVE_MEMCACHED_LAST_ERROR_MESSAGE
+
 /* Define to 1 if you have the <memory.h> header file. */
 #undef HAVE_MEMORY_H
 
@@ -46,6 +85,9 @@
 
 /* Define if you have POSIX threads libraries and header files. */
 #undef HAVE_PTHREAD
+
+/* Define to 1 if you have the <pwd.h> header file. */
+#undef HAVE_PWD_H
 
 /* Define to 1 if you have the <stdint.h> header file. */
 #undef HAVE_STDINT_H
@@ -79,6 +121,15 @@
 
 /* Define to 1 if you have the `strtok_r' function. */
 #undef HAVE_STRTOK_R
+
+/* Define to 1 if `sa_len' is a member of `struct sockaddr'. */
+#undef HAVE_STRUCT_SOCKADDR_SA_LEN
+
+/* Define to 1 if the system has the type `struct sockaddr_storage'. */
+#undef HAVE_STRUCT_SOCKADDR_STORAGE
+
+/* Define to 1 if you have the <sys/socket.h> header file. */
+#undef HAVE_SYS_SOCKET_H
 
 /* Define to 1 if you have the <sys/stat.h> header file. */
 #undef HAVE_SYS_STAT_H
@@ -135,6 +186,9 @@
 
 /* if you have the MIT gssapi libraries */
 #undef SHIBSP_HAVE_GSSMIT
+
+/* Define to 1 if you have the <sys/socket> header file. */
+#undef SHIBSP_HAVE_SYS_SOCKET_H
 
 /* Define to 1 if log4cpp library is used. */
 #undef SHIBSP_LOG4CPP

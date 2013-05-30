@@ -30,16 +30,19 @@
 #include "ServiceProvider.h"
 #include "SessionCache.h"
 #include "SPRequest.h"
+#include "TransactionLog.h"
 #include "handler/LogoutHandler.h"
 #include "util/TemplateParameters.h"
 
 #include <fstream>
+#include <boost/lexical_cast.hpp>
 #include <xmltooling/XMLToolingConfig.h>
 #include <xmltooling/util/PathResolver.h>
 #include <xmltooling/util/URLEncoder.h>
 
 using namespace shibsp;
 using namespace xmltooling;
+using namespace boost;
 using namespace std;
 
 LogoutHandler::LogoutHandler() : m_initiator(true)
@@ -69,8 +72,8 @@ pair<bool,long> LogoutHandler::sendLogoutPage(
         prop.second = tname.c_str();
     }
     response.setContentType("text/html");
-    response.setResponseHeader("Expires","01-Jan-1997 12:00:00 GMT");
-    response.setResponseHeader("Cache-Control","private,no-store,no-cache");
+    response.setResponseHeader("Expires","Wed, 01 Jan 1997 12:00:00 GMT");
+    response.setResponseHeader("Cache-Control","private,no-store,no-cache,max-age=0");
     string fname(prop.second);
     ifstream infile(XMLToolingConfig::getConfig().getPathResolver()->resolve(fname, PathResolver::XMLTOOLING_CFG_FILE).c_str());
     if (!infile)
@@ -154,35 +157,34 @@ pair<bool,long> LogoutHandler::notifyFrontChannel(
     loc = loc + (strchr(loc.c_str(),'?') ? '&' : '?') + "action=logout";
 
     // Now we create a second URL representing the return location back to us.
-    ostringstream locstr;
     const char* start = request.getRequestURL();
-    const char* end = strchr(start,'?');
-    string tempstr(start, end ? end-start : strlen(start));
+    const char* end = strchr(start, '?');
+    string locstr(start, end ? end - start : strlen(start));
 
     // Add a signal that we're coming back from notification and the next index.
-    locstr << tempstr << "?notifying=1&index=" << index;
+    locstr = locstr + "?notifying=1&index=" + lexical_cast<string>(index);
 
     // Add return if set.
     if (param)
-        locstr << "&return=" << encoder->encode(param);
+        locstr = locstr + "&return=" + encoder->encode(param);
 
     // We preserve anything we're instructed to directly.
     if (params) {
         for (map<string,string>::const_iterator p = params->begin(); p!=params->end(); ++p)
-            locstr << '&' << p->first << '=' << encoder->encode(p->second.c_str());
+            locstr = locstr + '&' + p->first + '=' + encoder->encode(p->second.c_str());
     }
     else {
         for (vector<string>::const_iterator q = m_preserve.begin(); q!=m_preserve.end(); ++q) {
             param = request.getParameter(q->c_str());
             if (param)
-                locstr << '&' << *q << '=' << encoder->encode(param);
+                locstr = locstr + '&' + *q + '=' + encoder->encode(param);
         }
     }
 
     // Add the notifier's return parameter to the destination location and redirect.
     // This is NOT the same as the return parameter that might be embedded inside it ;-)
-    loc = loc + "&return=" + encoder->encode(locstr.str().c_str());
-    return make_pair(true,response.sendRedirect(loc.c_str()));
+    loc = loc + "&return=" + encoder->encode(locstr.c_str());
+    return make_pair(true, response.sendRedirect(loc.c_str()));
 }
 
 #ifndef SHIBSP_LITE
@@ -210,7 +212,6 @@ namespace {
             HTTPSOAPTransport* http = dynamic_cast<HTTPSOAPTransport*>(&transport);
             if (http) {
                 http->useChunkedEncoding(false);
-                http->setRequestHeader("User-Agent", PACKAGE_NAME);
                 http->setRequestHeader(PACKAGE_NAME, PACKAGE_VERSION);
             }
         }
@@ -234,13 +235,13 @@ bool LogoutHandler::notifyBackChannel(
 
     if (SPConfig::getConfig().isEnabled(SPConfig::OutOfProcess)) {
 #ifndef SHIBSP_LITE
-        auto_ptr<Envelope> env(EnvelopeBuilder::buildEnvelope());
+        scoped_ptr<Envelope> env(EnvelopeBuilder::buildEnvelope());
         Body* body = BodyBuilder::buildBody();
         env->setBody(body);
         ElementProxy* msg = new AnyElementImpl(shibspconstants::SHIB2SPNOTIFY_NS, LogoutNotification);
         body->getUnknownXMLObjects().push_back(msg);
         msg->setAttribute(xmltooling::QName(nullptr, _type), local ? _local : _global);
-        for (vector<string>::const_iterator s = sessions.begin(); s!=sessions.end(); ++s) {
+        for (vector<string>::const_iterator s = sessions.begin(); s != sessions.end(); ++s) {
             auto_ptr_XMLCh temp(s->c_str());
             ElementProxy* child = new AnyElementImpl(shibspconstants::SHIB2SPNOTIFY_NS, SessionID);
             child->setTextContent(temp.get());
@@ -251,10 +252,10 @@ bool LogoutHandler::notifyBackChannel(
         SOAPNotifier soaper;
         while (!endpoint.empty()) {
             try {
-                soaper.send(*env.get(), SOAPTransport::Address(application.getId(), application.getId(), endpoint.c_str()));
+                soaper.send(*env, SOAPTransport::Address(application.getId(), application.getId(), endpoint.c_str()));
                 delete soaper.receive();
             }
-            catch (exception& ex) {
+            catch (std::exception& ex) {
                 Category::getInstance(SHIBSP_LOGCAT".Logout").error("error notifying application of logout event: %s", ex.what());
                 result = false;
             }
@@ -280,6 +281,41 @@ bool LogoutHandler::notifyBackChannel(
         DDF temp = DDF(nullptr).string(i->c_str());
         s.add(temp);
     }
-    out=application.getServiceProvider().getListenerService()->send(in);
+    out = application.getServiceProvider().getListenerService()->send(in);
     return (out.integer() == 1);
 }
+
+#ifndef SHIBSP_LITE
+
+LogoutEvent* LogoutHandler::newLogoutEvent(
+    const Application& application, const xmltooling::HTTPRequest* request, const Session* session
+    ) const
+{
+    if (!SPConfig::getConfig().isEnabled(SPConfig::Logging))
+        return nullptr;
+    try {
+        auto_ptr<TransactionLog::Event> event(SPConfig::getConfig().EventManager.newPlugin(LOGOUT_EVENT, nullptr));
+        LogoutEvent* logout_event = dynamic_cast<LogoutEvent*>(event.get());
+        if (logout_event) {
+            logout_event->m_request = request;
+            logout_event->m_app = &application;
+            logout_event->m_binding = getString("Binding").second;
+            logout_event->m_session = session;
+            if (session) {
+                logout_event->m_nameID = session->getNameID();
+                logout_event->m_sessions.push_back(session->getID());
+            }
+            event.release();
+            return logout_event;
+        }
+        else {
+            Category::getInstance(SHIBSP_LOGCAT".Logout").warn("unable to audit event, log event object was of an incorrect type");
+        }
+    }
+    catch (std::exception& ex) {
+        Category::getInstance(SHIBSP_LOGCAT".Logout").warn("exception auditing event: %s", ex.what());
+    }
+    return nullptr;
+}
+
+#endif
