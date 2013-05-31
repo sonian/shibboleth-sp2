@@ -46,6 +46,8 @@ shibboleth-sp2 (2.5.1+dfsg-1) UNRELEASED; urgency=low
   * Force build dependencies and package dependencies on xml-security-c
     1.7 or later, xmltooling 1.5 or later, and opensaml2 2.5 or later to
     ensure everything is consistent.
+  * Remove explicit build dependency on libtool.  This is now handled by
+    dh-autoreconf.
   * Remove the (undefined) warn_log destination from the default
     native.logger configuration file, restoring consistency with the
     Debian modification to log to syslog.  Since all native logs go to
