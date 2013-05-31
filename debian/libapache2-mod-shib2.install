@@ -4,6 +4,3 @@ etc/shibboleth
 usr/lib/*/shibboleth
 
 debian/shib2.load	etc/apache2/mods-available
-
-doc/logo.jpg	usr/share/shibboleth
-doc/main.css	usr/share/shibboleth

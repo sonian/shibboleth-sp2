@@ -39,7 +39,6 @@ Installation and Configuration
         Allow from all
     </Location>
     Alias /shibboleth-sp/main.css /usr/share/shibboleth/main.css
-    Alias /shibboleth-sp/logo.jpg /usr/share/shibboleth/logo.jpg
 
   For Shibboleth to work properly, you will need to extensively customize
   /etc/shibboleth/shibboleth2.xml for your site.  In particular, the
@@ -146,4 +145,4 @@ Further Information
 
   and in particular the "Configuration" link.
 
- -- Russ Allbery <rra@debian.org>, Tue, 10 Nov 2009 15:06:57 -0800
+ -- Russ Allbery <rra@debian.org>, Fri, 31 May 2013 11:13:59 -0700
