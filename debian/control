@@ -20,7 +20,6 @@ Section: httpd
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}, adduser
 Recommends: openssl
-Conflicts: libapache2-mod-shib
 Description: Federated web single sign-on system (Apache module)
  The Shibboleth System is a standards based software package for web
  single sign-on across or within organizational boundaries.  It supports
@@ -88,7 +87,6 @@ Section: text
 Architecture: all
 Multi-Arch: foreign
 Depends: ${misc:Depends}
-Conflicts: libapache2-mod-shib
 Description: Federated web single sign-on system (schemas)
  The Shibboleth System is a standards based software package for web
  single sign-on across or within organizational boundaries.  It supports
