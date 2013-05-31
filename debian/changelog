@@ -41,13 +41,6 @@ shibboleth-sp2 (2.5.1+dfsg-1) UNRELEASED; urgency=low
       handled more smoothly.
     - SP initialization now fails if an external session cache is
       configured but cannot be opened.
-  * Add build dependency on libboost-dev.
-  * Use log4shib instead of log4cpp.
-  * Force build dependencies and package dependencies on xml-security-c
-    1.7 or later, xmltooling 1.5 or later, and opensaml2 2.5 or later to
-    ensure everything is consistent.
-  * Remove explicit build dependency on libtool.  This is now handled by
-    dh-autoreconf.
   * Remove the (undefined) warn_log destination from the default
     native.logger configuration file, restoring consistency with the
     Debian modification to log to syslog.  Since all native logs go to
@@ -55,6 +48,15 @@ shibboleth-sp2 (2.5.1+dfsg-1) UNRELEASED; urgency=low
     on threshold.  The previous version of the file referenced a
     commented-out warn_log destination, which caused errors to be spammed
     to syslog.
+  * Add build dependency on libboost-dev.
+  * Use log4shib instead of log4cpp.
+  * Force build dependencies and package dependencies on xml-security-c
+    1.7 or later, xmltooling 1.5 or later, and opensaml2 2.5 or later to
+    ensure everything is consistent.
+  * Remove explicit build dependency on libtool.  This is now handled by
+    dh-autoreconf.
+  * Add Multi-Arch: same to libshibsp-dev and Multi-Arch: foreign to
+    libshibsp-doc and shibboleth-sp2-schemas.
   * Install the upstream doc/RELEASE.txt file as the upstream changelog.
     It's not exactly a changelog, but it has pointers to the upstream web
     documentation of changes, which is probably what people are looking for.
