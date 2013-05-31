@@ -1,2 +1,2 @@
 mod debian/shib2.load
-mod debian/tmp/usr/lib/apache2/modules/mod_shib_24.so
+mod debian/tmp/usr/lib/apache2/modules/mod_shib2.so
