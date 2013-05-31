@@ -64,6 +64,7 @@ override_dh_auto_install:
 	    debian/libapache2-mod-shib2.shibd.init
 
 override_dh_install:
+	mkdir -p debian/tmp/usr/lib/apache2/modules
 	mv debian/tmp/usr/lib/*/shibboleth/mod_shib_24.so \
 	    debian/tmp/usr/lib/apache2/modules
 	pod2man debian/man-pages/mdquery.pod --section 1		\
