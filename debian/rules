@@ -101,3 +101,6 @@ override_dh_installinit:
 override_dh_makeshlibs:
 	dh_makeshlibs -V'libshibsp5 (>= 2.4.3+dfsg-4~)' \
 	    -Xusr/lib/$(DEB_HOST_MULTIARCH)/shibboleth
+
+override_dh_builddeb:
+	dh_builddeb -- -Zxz
