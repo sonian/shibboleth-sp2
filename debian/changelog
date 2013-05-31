@@ -64,6 +64,8 @@ shibboleth-sp2 (2.5.1+dfsg-1) UNRELEASED; urgency=low
   * Add Multi-Arch: same to libshibsp-dev and Multi-Arch: foreign to
     libshibsp-doc and shibboleth-sp2-schemas.
   * Remove Conflicts with libapache2-mod-shib.  lenny is dead.
+  * Fix the libshibsp-doc package name in the Suggests on libshibsp-dev
+    and remove the nonstandard version constraint.
   * Install the upstream doc/RELEASE.txt file as the upstream changelog.
     It's not exactly a changelog, but it has pointers to the upstream web
     documentation of changes, which is probably what people are looking for.

@@ -55,7 +55,7 @@ Architecture: any
 Multi-Arch: same
 Depends: ${misc:Depends}, libshibsp6 (= ${binary:Version}),
  libsaml2-dev (>= 2.5), libxerces-c-dev, libxmltooling-dev (>= 1.5)
-Suggests: libshib2-doc (= ${source:Version})
+Suggests: libshibsp-doc
 Description: Federated web single sign-on system (development)
  The Shibboleth System is a standards based software package for web
  single sign-on across or within organizational boundaries.  It supports
