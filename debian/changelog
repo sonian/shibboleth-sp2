@@ -1,4 +1,4 @@
-shibboleth-sp2 (2.5.1+dfsg-1) UNRELEASED; urgency=low
+shibboleth-sp2 (2.5.1+dfsg-1) unstable; urgency=low
 
   * New upstream release.  (Closes: #685069)
     - Support for Apache 2.4.  Please note there are some configuration
@@ -86,7 +86,7 @@ shibboleth-sp2 (2.5.1+dfsg-1) UNRELEASED; urgency=low
   * Update standards version to 3.9.4.
     - Update debian/copyright to specify copyright-format 1.0.
 
- -- Russ Allbery <rra@debian.org>  Sat, 03 Nov 2012 10:27:33 -0700
+ -- Russ Allbery <rra@debian.org>  Fri, 31 May 2013 15:55:44 -0700
 
 shibboleth-sp2 (2.4.3+dfsg-5) unstable; urgency=low
 
