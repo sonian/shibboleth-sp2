@@ -5,7 +5,7 @@ Maintainer: Debian Shib Team <pkg-shibboleth-devel@lists.alioth.debian.org>
 Uploaders: Russ Allbery <rra@debian.org>, Ferenc Wagner <wferi@niif.hu>,
  Faidon Liambotis <paravoid@debian.org>
 Build-Depends: debhelper (>= 9), apache2-dev (>> 2.4.4), dh-apache2,
- dh-autoreconf, doxygen, graphviz, libboost-dev, libkrb5-dev,
+ dh-autoreconf, doxygen, graphviz, libboost-dev, libfcgi-dev, libkrb5-dev,
  liblog4shib-dev, libmemcached-dev (>= 1.0), libsaml2-dev (>= 2.5),
  libssl-dev, libxerces-c-dev, libxml-security-c-dev (>= 1.7),
  libxmltooling-dev (>= 1.5), opensaml2-schemas, pkg-config, unixodbc-dev,

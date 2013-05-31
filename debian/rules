@@ -46,7 +46,7 @@ override_dh_auto_configure:
 	    --libexecdir=/usr/lib/$(DEB_HOST_MULTIARCH)/shibboleth	\
 	    --localstatedir=/var --enable-apache-24			\
 	    --with-apxs24=/usr/bin/apxs2 --disable-dependency-tracking	\
-	    --with-memcached $(SYSTEM)
+	    --with-memcached --with-fastcgi $(SYSTEM)
 
 override_dh_auto_install:
 	NOKEYGEN=1 dh_auto_install
