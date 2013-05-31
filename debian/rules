@@ -82,7 +82,7 @@ override_dh_install:
 	pod2man debian/man-pages/shibd.pod --section 8			\
 	    --center 'Shibboleth' --release $(VERSION)			\
 	    debian/libapache2-mod-shib2/usr/share/man/man8/shibd.8
-	dh_install -s -i -X mod_shib_24.so --fail-missing
+	dh_install -s -i -X mod_shib2.so --fail-missing
 
 override_dh_installchangelogs:
 	dh_installchangelogs doc/RELEASE.txt
