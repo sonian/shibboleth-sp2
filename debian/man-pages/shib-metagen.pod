@@ -7,7 +7,8 @@ shib-metagen - Generate metadata for a Shibboleth SP
 B<shib-metagen> [B<-12ADLNO>] [B<-c> I<cert> [B<-c> I<cert> ...]]
     [B<-e> I<entity-id>] [B<-f> I<format> [B<-f> I<format> ...]]
     [B<-h> I<host> [B<-h> I<host> ...]] [B<-n> I<host> [B<-n> I<host> ...]]
-    [B<-o> I<organization>] [B<-a> I<admin> [B<-a> I<admin> ...]]
+    [B<-l> I<host-file>] [B<-o> I<organization>]
+    [B<-a> I<admin> [B<-a> I<admin> ...]]
     [B<-s> I<support> [B<-s> I<support> ...]]
     [B<-t> I<tech> [B<-t> I<tech> ...]] [B<-u> I<url>]
 
@@ -73,15 +74,23 @@ than once.
 
 =item B<-h> I<host>
 
-A hostname for this SP (possibly a virtual host).  Either this option or
-B<-n> must be specified at least once.  It should be repeated for every
-virtual host that responds to the Shibboleth protocol.  B<-h> should be
-used for hostnames or virtual hosts that use SSL.
+A hostname for this SP (possibly a virtual host).  Either this option, the
+B<-n> option, or the B<-l> option must be specified at least once.  It
+should be repeated for every virtual host that responds to the Shibboleth
+protocol.  B<-h> should be used for hostnames or virtual hosts that use
+SSL.
 
 =item B<-L>
 
 Include Single Logout information in the metadata.  This is not included
 by default.
+
+=item B<-l> I<host-list>
+
+Read the list of hostnames for this SP from a file.  Each line of the file
+will be treated as if it were passed as an argument to the B<-h> option to
+specify a hostname or virtual host that responds to the Shibboleth
+protocol and uses SSL.
 
 =item B<-N>
 
@@ -90,11 +99,11 @@ included by default.
 
 =item B<-n> I<host>
 
-A hostname for this SP (possibly a virtual host).  Either this option or
-B<-h> must be specified at least once.  It should be repeated for every
-virtual host that responds to the Shibboleth protocol.  B<-n> should be
-used for hostnames or virtual hosts that do not use SSL to protect the
-Shibboleth communication.
+A hostname for this SP (possibly a virtual host).  Either this option, the
+B<-h>, or the B<-l> option must be specified at least once.  It should be
+repeated for every virtual host that responds to the Shibboleth protocol.
+B<-n> should be used for hostnames or virtual hosts that do not use SSL to
+protect the Shibboleth communication.
 
 =item B<-O>
 
