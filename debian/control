@@ -4,11 +4,12 @@ Priority: extra
 Maintainer: Debian Shib Team <pkg-shibboleth-devel@lists.alioth.debian.org>
 Uploaders: Russ Allbery <rra@debian.org>, Ferenc Wagner <wferi@niif.hu>,
  Faidon Liambotis <paravoid@debian.org>
-Build-Depends: debhelper (>= 9), apache2-threaded-dev, dh-autoreconf,
- doxygen, graphviz, liblog4cpp5-dev, libmemcached-dev (>= 1.0),
- libsaml2-dev (>= 2.4), libssl-dev, libtool, libxerces-c-dev,
- libxml-security-c-dev (>= 1.6), libxmltooling-dev (>= 1.4),
- opensaml2-schemas, pkg-config, unixodbc-dev, xmltooling-schemas
+Build-Depends: debhelper (>= 9), apache2-dev (>> 2.4), dh-apache2,
+ dh-autoreconf, doxygen, graphviz, liblog4cpp5-dev,
+ libmemcached-dev (>= 1.0), libsaml2-dev (>= 2.4), libssl-dev, libtool,
+ libxerces-c-dev, libxml-security-c-dev (>= 1.6),
+ libxmltooling-dev (>= 1.4), opensaml2-schemas, pkg-config, unixodbc-dev,
+ xmltooling-schemas
 Standards-Version: 3.9.2
 Homepage: http://shibboleth.internet2.edu/
 Vcs-Git: git://git.debian.org/git/pkg-shibboleth/shibboleth-sp2.git
@@ -18,7 +19,7 @@ Package: libapache2-mod-shib2
 Section: httpd
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}, adduser
-Recommends: apache2, openssl
+Recommends: openssl
 Conflicts: libapache2-mod-shib
 Description: Federated web single sign-on system (Apache module)
  The Shibboleth System is a standards based software package for web
