@@ -64,6 +64,9 @@ shibboleth-sp2 (2.5.1+dfsg-1) UNRELEASED; urgency=low
   * Switch to xz compression for the repackaged upstream
     source, *.debian.tar, and the *.deb packages.
   * Update upstream Homepage.
+  * Canonicalize the URLs in the Vcs-Git and Vcs-Browser control fields.
+  * Update standards version to 3.9.4.
+    - Update debian/copyright to specify copyright-format 1.0.
 
  -- Russ Allbery <rra@debian.org>  Sat, 03 Nov 2012 10:27:33 -0700
 

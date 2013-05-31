@@ -10,10 +10,10 @@ Build-Depends: debhelper (>= 9), apache2-dev (>> 2.4.4), dh-apache2,
  libxerces-c-dev, libxml-security-c-dev (>= 1.7),
  libxmltooling-dev (>= 1.5), opensaml2-schemas, pkg-config, unixodbc-dev,
  xmltooling-schemas
-Standards-Version: 3.9.2
+Standards-Version: 3.9.4
 Homepage: http://shibboleth.net/
-Vcs-Git: git://git.debian.org/git/pkg-shibboleth/shibboleth-sp2.git
-Vcs-Browser: http://git.debian.org/?p=pkg-shibboleth/shibboleth-sp2.git
+Vcs-Git: git://anonscm.debian.org/pkg-shibboleth/shibboleth-sp2.git
+Vcs-Browser: http://anonscm.debian.org/gitweb/?p=pkg-shibboleth/shibboleth-sp2.git
 
 Package: libapache2-mod-shib2
 Section: httpd
