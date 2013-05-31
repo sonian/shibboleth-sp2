@@ -10,21 +10,31 @@ Introduction
   either one that the Shibboleth SP points to directly or one that is part
   of a federation that is trusted by the Shibboleth SP.
 
-  This is the Shibboleth 2 version of the SP.  For the 1.x version of
-  the Shibboleth SP (if it is still available), see libapache-mod-shib.
-
 Installation and Configuration
 
-  After installing this package, the module is available but not enabled.
-  It's not enabled automatically since some configuration is required
-  before it will work (at least creating a certificate for the SP to use
-  to authenticate to IdPs).
+  The following instructions assume use of the Apache 2.4 access
+  restriction syntax.  If you are still using the earlier Allow/Deny
+  directives, you may need to use "Allow from all" instead of or in
+  addition to "Require all granted".
+
+  After installing this package, the module is enabled but not properly
+  configured.  At least some manual configuration will be required before
+  the module can be used, such as creating a certificate for the SP to use
+  to authenticate to IdPs.
 
   To generate a self-signed certificate for the Shibboleth SP, run
   shib-keygen.  See its manual page for more information.  This may or may
   not be what you want to do depending on which federation you plan on
   joining; some federations may want you to follow other procedures for
   generating a certificate.
+
+  If you use a restrictive Apache configuration that denies access to all
+  URLs by default, you will need to grant access to any authenticated
+  Shibboleth client to the /Shibboleth.sso URL.  For example:
+
+    <Location "/Shibboleth.sso">
+        Require all granted
+    </Location>
 
   The default error messages from Shibboleth are located in
   /etc/shibboleth/*.html.  The paths to those error messages are
@@ -36,7 +46,7 @@ Installation and Configuration
   /shibboleth-sp), add this to your Apache configuration:
 
     <Location /shibboleth-sp>
-        Allow from all
+        Require all granted
     </Location>
     Alias /shibboleth-sp/main.css /usr/share/shibboleth/main.css
 
@@ -64,10 +74,9 @@ Installation and Configuration
 Changes in Debian Package
 
   The logging configuration for the native.log file has been changed to
-  use syslog, since the upstream default tries to write to a file that
-  Apache has no privileges to write to.  See /etc/shibboleth/native.logger
-  for more details.  If you want the other parts of Shibboleth to also log
-  to syslog, change the other /etc/shibboleth/*.logger files similarly.
+  use syslog.  See /etc/shibboleth/native.logger for more details.  If you
+  want the other parts of Shibboleth to also log to syslog, change the
+  other /etc/shibboleth/*.logger files similarly.
 
   The WS-Trust.xsd schema, which is needed if you use the ADFS support
   and turn on schema validation, was removed from the Debian package for
@@ -141,8 +150,6 @@ Further Information
 
   For further installation information, see:
 
-    https://spaces.internet2.edu/display/SHIB2/Home
+    https://wiki.shibboleth.net/confluence/display/SHIB2/NativeSPConfiguration
 
-  and in particular the "Configuration" link.
-
- -- Russ Allbery <rra@debian.org>, Fri, 31 May 2013 11:13:59 -0700
+ -- Russ Allbery <rra@debian.org>, Fri, 31 May 2013 15:52:13 -0700

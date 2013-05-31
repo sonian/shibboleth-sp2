@@ -41,6 +41,14 @@ shibboleth-sp2 (2.5.1+dfsg-1) UNRELEASED; urgency=low
       handled more smoothly.
     - SP initialization now fails if an external session cache is
       configured but cannot be opened.
+  * Update libapache2-mod-shib2's README.Debian:
+    - Use the Apache 2.4 authorization syntax.
+    - Mention possibly having to grant access to /Shibboleth.sso.
+    - The module is now enabled by default but still needs configuration.
+    - Update the upstream configuration documentation URL.
+    - The reason for switching native.logger to syslog is now obsolete
+      (but the package still does that, possibly to be reconsidered
+      later).
   * Remove the (undefined) warn_log destination from the default
     native.logger configuration file, restoring consistency with the
     Debian modification to log to syslog.  Since all native logs go to
