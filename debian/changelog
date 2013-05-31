@@ -69,6 +69,8 @@ shibboleth-sp2 (2.5.1+dfsg-1) UNRELEASED; urgency=low
   * Install the upstream doc/RELEASE.txt file as the upstream changelog.
     It's not exactly a changelog, but it has pointers to the upstream web
     documentation of changes, which is probably what people are looking for.
+  * Drop postinst code to handle upgrades from the Shibboleth 1.x module,
+    which was last included in lenny.
   * Switch to xz compression for the repackaged upstream
     source, *.debian.tar, and the *.deb packages.
   * Update upstream Homepage.
