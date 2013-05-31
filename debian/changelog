@@ -41,6 +41,7 @@ shibboleth-sp2 (2.5.1+dfsg-1) UNRELEASED; urgency=low
       handled more smoothly.
     - SP initialization now fails if an external session cache is
       configured but cannot be opened.
+  * Add build dependency on libboost-dev.
   * Use log4shib instead of log4cpp.
   * Force build dependencies and package dependencies on xml-security-c
     1.7 or later, xmltooling 1.5 or later, and opensaml2 2.5 or later to
