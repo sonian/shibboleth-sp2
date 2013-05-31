@@ -1,5 +1,46 @@
 shibboleth-sp2 (2.5.1+dfsg-1) UNRELEASED; urgency=low
 
+  * New upstream release.  (Closes: #685069)
+    - Support for Apache 2.4.  Please note there are some configuration
+      incompabilities between Apache 2.4 and Apache 2.2.  See the upstream
+      documentation at
+      https://wiki.shibboleth.net/confluence/display/SHIB2/NativeSPApacheConfig
+      for more information.  (Closes: #666804)
+    - Disable the PKCS 1.5 algorithm for SAML assertion encryption by
+      default for security reasons.  This can be re-enabled if necessary
+      in the security-policy.xml configuration file.
+    - The protocol between the Apache module and shibd has changed.  shibd
+      will be restarted during upgrades, but if the module is configured
+      to talk to a remote shibd over TCP, both the module and shibd must
+      be upgraded at the same time.
+    - Settings to limit redirections have been renamed from
+      relayStateLimit and relayStateWhitelist to redirectLimit and
+      redirectWhitelist respectively and the old names are deprecated (but
+      still supported).
+    - cookieProps has been simplified and warnings introduced if SSL
+      restrictions are not enabled.
+    - The <AttributeExtractor> element that loads the attribute-map.xml
+      file now defaults to reloadChanges="false".  Restarting the SP when
+      this file changes is recommended for security reasons.
+    - Logging properties have been removed from the default configuration
+      file and the absence of properties now indicates use of the default
+      logging configuration files (shibd.logger and native.logger).
+    - The native.log file is now created as root before Apache child
+      initialization to minimize permission issues.
+    - Files that persist across server restarts have been moved to
+      /var/cache/shibboleth.
+    - The example style sheet for error templates has been moved to a
+      version-independent location in /usr/share/shibboleth.  A logo file
+      is no longer included in the package to avoid accidental use of the
+      Shibboleth logo on production sites.  If your existing error
+      templates reference these files, you should correct this by copying
+      files that you need to locations that you control.
+    - The module should now be referenced as mod_shib.cpp in conditionals
+      that want to reference a source file name.
+    - Clients that bounce between IPv4 and IPv6 addresses should now be
+      handled more smoothly.
+    - SP initialization now fails if an external session cache is
+      configured but cannot be opened.
   * Remove the (undefined) warn_log destination from the default
     native.logger configuration file, restoring consistency with the
     Debian modification to log to syslog.  Since all native logs go to
