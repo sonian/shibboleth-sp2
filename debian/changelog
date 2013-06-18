@@ -22,6 +22,9 @@ shibboleth-sp2 (2.5.2+dfsg-1) UNRELEASED; urgency=low
     that have to be available to everyone and to use Require shib-session
     instead of Require valid-user.
   * Create /var/cache/shibboleth on install and remove it on purge.
+  * Link the FastCGI programs with libxmltooling-lite since they call one
+    of its interfaces directly.  (This shows up as a build failure
+    otherwise due to the Debian build rules use of --as-needed.)
 
  -- Russ Allbery <rra@debian.org>  Tue, 18 Jun 2013 11:13:01 -0700
 
