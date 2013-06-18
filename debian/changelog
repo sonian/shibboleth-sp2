@@ -1,6 +1,26 @@
 shibboleth-sp2 (2.5.2+dfsg-1) UNRELEASED; urgency=low
 
   * New upstream release.
+    - New shib-session and shib-user Require authentication types added,
+      which should be used in preference to Require valid-user or Require
+      user with Shibboleth authentication is desired.
+    - New ShibCompatValidUser Apache directive, which works around the way
+      that Shibboleth hooks into Require valid-user and Require user so
+      that those directives will continue to work with non-Shibboleth
+      authentication types.  This directive will be needed for servers
+      that use Shibboleth and other authentication methods and want to use
+      Require valid-user or Require user with non-Shibboleth methods.
+    - Fix implementation of shib-metagen -l.
+    - Fix AttributeExtractor handling of multiple logos.
+    - Fix metadata attribute extraction with non-ASCII characters.
+    - Fix problems with Apache subrequests during server-side include
+      handling of unprotected pages.
+    - Add character set to DiscoFeed page header.
+    - Avoid leaking shibd sockets to child processes.
+  * Add NEWS entry for the authentication directive changes.
+  * Update README.Debian instructions to add AuthType None to the URLs
+    that have to be available to everyone and to use Require shib-session
+    instead of Require valid-user.
 
  -- Russ Allbery <rra@debian.org>  Tue, 18 Jun 2013 11:13:01 -0700
 

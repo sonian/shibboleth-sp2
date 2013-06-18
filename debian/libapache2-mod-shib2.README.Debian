@@ -33,6 +33,7 @@ Installation and Configuration
   Shibboleth client to the /Shibboleth.sso URL.  For example:
 
     <Location "/Shibboleth.sso">
+        AuthType None
         Require all granted
     </Location>
 
@@ -46,6 +47,7 @@ Installation and Configuration
   /shibboleth-sp), add this to your Apache configuration:
 
     <Location /shibboleth-sp>
+        AuthType None
         Require all granted
     </Location>
     Alias /shibboleth-sp/main.css /usr/share/shibboleth/main.css
@@ -64,7 +66,7 @@ Installation and Configuration
     <Location /secure>
         AuthType shibboleth
         ShibRequestSetting requireSession 1
-        require valid-user
+        Require shib-session
     </Location>
 
   for some <Location>, <Directory>, or <Files> block.  You can also put
@@ -152,4 +154,4 @@ Further Information
 
     https://wiki.shibboleth.net/confluence/display/SHIB2/NativeSPConfiguration
 
- -- Russ Allbery <rra@debian.org>, Fri, 31 May 2013 15:52:13 -0700
+ -- Russ Allbery <rra@debian.org>, Tue, 18 Jun 2013 14:50:43 -0700

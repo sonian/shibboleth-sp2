@@ -1,3 +1,22 @@
+shibboleth-sp2 (2.5.2+dfsg-1) experimental; urgency=low
+
+  Shibboleth has added new Require shib-session and Require shib-user
+  directives, which will replace use of Require valid-user and Require
+  user with Shibboleth authentication.  If you are currently using
+  valid-user or user restrictions with Shibboleth, consider switching to
+  shib-session and shib-user, respectively.
+
+  If you are using both Shibboleth and another authentication method, such
+  as basic auth, on the same Apache server and want to use Require
+  valid-user or Require user with the non-Shibboleth authentication
+  method, you will need to add:
+
+      ShibCompatValidUser On
+
+  to your server or virtual host configuration.
+  
+ -- Russ Allbery <rra@debian.org>  Tue, 18 Jun 2013 14:47:40 -0700
+
 shibboleth-sp2 (2.3+dfsg-1) unstable; urgency=high
 
   As of this release, running shibd as a non-root user is supported and
