@@ -21,6 +21,7 @@ shibboleth-sp2 (2.5.2+dfsg-1) UNRELEASED; urgency=low
   * Update README.Debian instructions to add AuthType None to the URLs
     that have to be available to everyone and to use Require shib-session
     instead of Require valid-user.
+  * Create /var/cache/shibboleth on install and remove it on purge.
 
  -- Russ Allbery <rra@debian.org>  Tue, 18 Jun 2013 11:13:01 -0700
 

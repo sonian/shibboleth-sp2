@@ -11,6 +11,12 @@ if [ "$1" = "configure" ] ; then
     fi
 fi
 
+# Create the cache directory owned by the shibd user.
+if [ ! -d /var/cache/shibboleth ] ; then
+    mkdir /var/cache/shibboleth
+    chown _shibd:_shibd /var/cache/shibboleth
+fi
+
 #DEBHELPER#
 
 exit 0
