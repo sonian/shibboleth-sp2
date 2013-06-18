@@ -1,4 +1,4 @@
-shibboleth-sp2 (2.5.2+dfsg-1) UNRELEASED; urgency=low
+shibboleth-sp2 (2.5.2+dfsg-1) experimental; urgency=low
 
   * New upstream release.
     - New shib-session and shib-user Require authentication types added,
@@ -26,7 +26,7 @@ shibboleth-sp2 (2.5.2+dfsg-1) UNRELEASED; urgency=low
     of its interfaces directly.  (This shows up as a build failure
     otherwise due to the Debian build rules use of --as-needed.)
 
- -- Russ Allbery <rra@debian.org>  Tue, 18 Jun 2013 11:13:01 -0700
+ -- Russ Allbery <rra@debian.org>  Tue, 18 Jun 2013 16:42:34 -0700
 
 shibboleth-sp2 (2.5.1+dfsg-1) experimental; urgency=low
 
