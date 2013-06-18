@@ -136,6 +136,7 @@ namespace {
 struct shib_server_config
 {
     char* szScheme;
+    int bCompatValidUser;
 };
 
 // creates the per-server configuration
@@ -143,6 +144,7 @@ extern "C" void* create_shib_server_config(SH_AP_POOL* p, server_rec* s)
 {
     shib_server_config* sc=(shib_server_config*)ap_pcalloc(p,sizeof(shib_server_config));
     sc->szScheme = nullptr;
+    sc->bCompatValidUser = -1;
     return sc;
 }
 
@@ -159,6 +161,8 @@ extern "C" void* merge_shib_server_config (SH_AP_POOL* p, void* base, void* sub)
         sc->szScheme=ap_pstrdup(p,parent->szScheme);
     else
         sc->szScheme=nullptr;
+
+    sc->bCompatValidUser = ((child->bCompatValidUser==-1) ? parent->bCompatValidUser : child->bCompatValidUser);
 
     return sc;
 }
@@ -809,8 +813,9 @@ extern "C" int shib_handler(request_rec* r)
 #else
         shib_request_config* rc = (shib_request_config*)ap_get_module_config(r->request_config, &mod_shib);
         if (!rc || !rc->sta) {
-            ap_log_rerror(APLOG_MARK, APLOG_ERR|APLOG_NOERRNO, SH_AP_R(r), "shib_handler found no per-request structure");
-            return SERVER_ERROR;
+            ap_log_rerror(APLOG_MARK, APLOG_DEBUG|APLOG_NOERRNO, SH_AP_R(r), "shib_handler found no per-request structure");
+            shib_post_read(r);  // ensures objects are created if post_read hook didn't run
+            rc = (shib_request_config*)ap_get_module_config(r->request_config, &mod_shib);
         }
         ShibTargetApache* psta = rc->sta;
 #endif
@@ -1290,7 +1295,14 @@ AccessControl::aclresult_t htAccessControl::authorized(const SPRequest& request,
             request.log(SPRequest::SPDebug, "htaccess: accepting valid-user based on active session");
             status = true;
         }
+        else if (sta->m_dc->bCompatWith24 == 1 && !strcmp(w,"shib-session") && session) {
+            request.log(SPRequest::SPDebug, "htaccess: accepting shib-session based on active session");
+            status = true;
+        }
         else if (!strcmp(w,"user") && !remote_user.empty()) {
+            status = (doUser(*sta, t) == shib_acl_true);
+        }
+        else if (sta->m_dc->bCompatWith24 == 1 && !strcmp(w,"shib-user") && !remote_user.empty()) {
             status = (doUser(*sta, t) == shib_acl_true);
         }
         else if (!strcmp(w,"group")  && !remote_user.empty()) {
@@ -1578,7 +1590,7 @@ extern "C" authz_status shib_shibboleth_check_authz(request_rec* r, const char* 
     return AUTHZ_GRANTED;
 }
 
-extern "C" authz_status shib_validuser_check_authz(request_rec* r, const char* require_line, const void*)
+extern "C" authz_status shib_session_check_authz(request_rec* r, const char* require_line, const void*)
 {
     pair<ShibTargetApache*,authz_status> sta = shib_base_check_authz(r);
     if (!sta.first)
@@ -1588,7 +1600,7 @@ extern "C" authz_status shib_validuser_check_authz(request_rec* r, const char* r
         Session* session = sta.first->getSession(false, true, false);
         Locker slocker(session, false);
         if (session) {
-            sta.first->log(SPRequest::SPDebug, "htaccess: accepting valid-user based on active session");
+            sta.first->log(SPRequest::SPDebug, "htaccess: accepting shib-session/valid-user based on active session");
             return AUTHZ_GRANTED;
         }
     }
@@ -1596,13 +1608,36 @@ extern "C" authz_status shib_validuser_check_authz(request_rec* r, const char* r
         sta.first->log(SPRequest::SPWarn, string("htaccess: unable to obtain session for access control check: ") +  e.what());
     }
 
+    sta.first->log(SPRequest::SPDebug, "htaccess: denying shib-access/valid-user rule, no active session");
     return AUTHZ_DENIED_NO_USER;
 }
 
-extern "C" authz_status shib_user_check_authz(request_rec* r, const char* require_line, const void*)
+extern "C" authz_status shib_validuser_check_authz(request_rec* r, const char* require_line, const void*)
 {
-    if (!r->user || !*(r->user))
+    // Shouldn't have actually ever hooked this, and now we're in conflict with mod_authz_user over the meaning.
+    // For now, added a command to restore "normal" semantics for valid-user so that combined deployments can
+    // use valid-user for non-Shibboleth cases and shib-session for the Shibboleth semantic.
+
+    // In future, we may want to expose the AuthType set to honor down at this level so we can differentiate
+    // based on AuthType. Unfortunately we allow overriding the AuthType to honor and we don't have access to
+    // that setting from the ServiceProvider class..
+
+    shib_server_config* sc = (shib_server_config*)ap_get_module_config(r->server->module_config, &mod_shib);
+    if (sc->bCompatValidUser != 1) {
+        return shib_session_check_authz(r, require_line, nullptr);
+    }
+
+    // Reproduce mod_authz_user version...
+
+    if (!r->user) {
         return AUTHZ_DENIED_NO_USER;
+    }
+
+    return AUTHZ_GRANTED;
+}
+
+extern "C" authz_status shib_ext_user_check_authz(request_rec* r, const char* require_line, const void*)
+{
     pair<ShibTargetApache*,authz_status> sta = shib_base_check_authz(r);
     if (!sta.first)
         return sta.second;
@@ -1610,6 +1645,43 @@ extern "C" authz_status shib_user_check_authz(request_rec* r, const char* requir
     const htAccessControl& hta = dynamic_cast<const ApacheRequestMapper*>(sta.first->getRequestSettings().first)->getHTAccessControl();
     if (hta.doUser(*sta.first, require_line) == AccessControl::shib_acl_true)
         return AUTHZ_GRANTED;
+    return AUTHZ_DENIED;
+}
+
+extern "C" authz_status shib_user_check_authz(request_rec* r, const char* require_line, const void*)
+{
+    // Shouldn't have actually ever hooked this, and now we're in conflict with mod_authz_user over the meaning.
+    // For now, added a command to restore "normal" semantics for user rules so that combined deployments can
+    // use user for non-Shibboleth cases and shib-user for the Shibboleth semantic.
+
+    // In future, we may want to expose the AuthType set to honor down at this level so we can differentiate
+    // based on AuthType. Unfortunately we allow overriding the AuthType to honor and we don't have access to
+    // that setting from the ServiceProvider class..
+
+    shib_server_config* sc = (shib_server_config*)ap_get_module_config(r->server->module_config, &mod_shib);
+    if (sc->bCompatValidUser != 1) {
+        return shib_ext_user_check_authz(r, require_line, nullptr);
+    }
+
+    // Reproduce mod_authz_user version...
+
+    if (!r->user) {
+        return AUTHZ_DENIED_NO_USER;
+    }
+ 	
+    const char* t = require_line;
+    const char *w;
+    while ((w = ap_getword_conf(r->pool, &t)) && w[0]) {
+        if (!strcmp(r->user, w)) {
+            return AUTHZ_GRANTED;
+        }
+    }
+ 	
+    ap_log_rerror(APLOG_MARK, APLOG_ERR, 0, r, APLOGNO(01663)
+        "access to %s failed, reason: user '%s' does not meet "
+        "'require'ments for user to be allowed access",
+        r->uri, r->user);
+ 	
     return AUTHZ_DENIED;
 }
 
@@ -1721,6 +1793,14 @@ extern "C" const char* shib_set_server_string_slot(cmd_parms* parms, void*, cons
     char* base=(char*)ap_get_module_config(parms->server->module_config,&mod_shib);
     size_t offset=(size_t)parms->info;
     *((char**)(base + offset))=ap_pstrdup(parms->pool,arg);
+    return nullptr;
+}
+
+extern "C" const char* shib_set_server_flag_slot(cmd_parms* parms, void*, int arg)
+{
+    char* base=(char*)ap_get_module_config(parms->server->module_config,&mod_shib);
+    size_t offset=(size_t)parms->info;
+    *((int*)(base + offset)) = arg;
     return nullptr;
 }
 
@@ -2077,7 +2157,9 @@ module MODULE_VAR_EXPORT mod_shib = {
 #ifdef SHIB_APACHE_24
 extern "C" const authz_provider shib_authz_shibboleth_provider = { &shib_shibboleth_check_authz, nullptr };
 extern "C" const authz_provider shib_authz_validuser_provider = { &shib_validuser_check_authz, nullptr };
+extern "C" const authz_provider shib_authz_session_provider = { &shib_session_check_authz, nullptr };
 extern "C" const authz_provider shib_authz_user_provider = { &shib_user_check_authz, nullptr };
+extern "C" const authz_provider shib_authz_ext_user_provider = { &shib_ext_user_check_authz, nullptr };
 extern "C" const authz_provider shib_authz_acclass_provider = { &shib_acclass_check_authz, nullptr };
 extern "C" const authz_provider shib_authz_acdecl_provider = { &shib_acdecl_check_authz, nullptr };
 extern "C" const authz_provider shib_authz_attr_provider = { &shib_attr_check_authz, nullptr };
@@ -2121,7 +2203,9 @@ extern "C" void shib_register_hooks (apr_pool_t *p)
 #ifdef SHIB_APACHE_24
     ap_register_auth_provider(p, AUTHZ_PROVIDER_GROUP, "shibboleth", AUTHZ_PROVIDER_VERSION, &shib_authz_shibboleth_provider, AP_AUTH_INTERNAL_PER_CONF);
     ap_register_auth_provider(p, AUTHZ_PROVIDER_GROUP, "valid-user", AUTHZ_PROVIDER_VERSION, &shib_authz_validuser_provider, AP_AUTH_INTERNAL_PER_CONF);
+    ap_register_auth_provider(p, AUTHZ_PROVIDER_GROUP, "shib-session", AUTHZ_PROVIDER_VERSION, &shib_authz_session_provider, AP_AUTH_INTERNAL_PER_CONF);
     ap_register_auth_provider(p, AUTHZ_PROVIDER_GROUP, "user", AUTHZ_PROVIDER_VERSION, &shib_authz_user_provider, AP_AUTH_INTERNAL_PER_CONF);
+    ap_register_auth_provider(p, AUTHZ_PROVIDER_GROUP, "shib-user", AUTHZ_PROVIDER_VERSION, &shib_authz_ext_user_provider, AP_AUTH_INTERNAL_PER_CONF);
     ap_register_auth_provider(p, AUTHZ_PROVIDER_GROUP, "authnContextClassRef", AUTHZ_PROVIDER_VERSION, &shib_authz_acclass_provider, AP_AUTH_INTERNAL_PER_CONF);
     ap_register_auth_provider(p, AUTHZ_PROVIDER_GROUP, "authnContextDeclRef", AUTHZ_PROVIDER_VERSION, &shib_authz_acdecl_provider, AP_AUTH_INTERNAL_PER_CONF);
     ap_register_auth_provider(p, AUTHZ_PROVIDER_GROUP, "shib-attr", AUTHZ_PROVIDER_VERSION, &shib_authz_attr_provider, AP_AUTH_INTERNAL_PER_CONF);
@@ -2174,6 +2258,9 @@ static command_rec shib_cmds[] = {
     AP_INIT_FLAG("ShibRequestMapperAuthz", (config_fn_t)ap_set_flag_slot,
         (void *) offsetof (shib_dir_config, bRequestMapperAuthz),
         OR_AUTHCFG, "Support access control via shibboleth2.xml / RequestMapper"),
+    AP_INIT_FLAG("ShibCompatValidUser", (config_fn_t)shib_set_server_flag_slot,
+        (void *) offsetof (shib_server_config, bCompatValidUser),
+        RSRC_CONF, "Handle 'require valid-user' in mod_authz_user-compatible fashion (requiring username)"),
 #else
     AP_INIT_TAKE1("AuthGroupFile", (config_fn_t)shib_ap_set_file_slot,
         (void *) offsetof (shib_dir_config, szAuthGrpFile),

@@ -89,6 +89,9 @@
 /* Define to 1 if you have the <pwd.h> header file. */
 #undef HAVE_PWD_H
 
+/* Define if the SOCK_CLOEXEC flag is supported */
+#undef HAVE_SOCK_CLOEXEC
+
 /* Define to 1 if you have the <stdint.h> header file. */
 #undef HAVE_STDINT_H
 

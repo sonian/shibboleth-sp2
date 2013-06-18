@@ -13,11 +13,27 @@
 LoadModule mod_shib @-PKGLIBDIR-@/mod_shib_24.so
 
 #
+# Turn this on to support "require valid-user" rules from other
+# mod_authn_* modules, and use "require shib-session" for anonymous
+# session-based authorization in mod_shib.
+#
+ShibCompatValidUser Off
+
+#
+# Ensures handler will be accessible.
+#
+<Location /Shibboleth.sso>
+  AuthType None
+  Require all granted
+</Location>
+
+#
 # Used for example style sheet in error templates.
 #
 <IfModule mod_alias.c>
   <Location /shibboleth-sp>
-    Allow from all
+    AuthType None
+    Require all granted
   </Location>
   Alias /shibboleth-sp/main.css @-PKGWEBDIR-@/main.css
 </IfModule>
