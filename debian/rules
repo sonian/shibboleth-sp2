@@ -48,6 +48,10 @@ override_dh_auto_configure:
 	    --with-apxs24=/usr/bin/apxs2 --disable-dependency-tracking	\
 	    --with-memcached --with-fastcgi --with-gssapi $(SYSTEM)
 
+# Move supporting scripts from the configuration directory into /usr/sbin
+# and remove various configuration files that aren't of interest on Debian.
+# Also move the one architecture-dependent header file into an
+# architecture-specific directory.
 override_dh_auto_install:
 	NOKEYGEN=1 dh_auto_install
 	rm -r debian/tmp/usr/share/doc/shibboleth*
@@ -62,6 +66,9 @@ override_dh_auto_install:
 	mv debian/tmp/etc/shibboleth/metagen.sh debian/tmp/usr/bin/shib-metagen
 	mv debian/tmp/etc/shibboleth/shibd-debian \
 	    debian/libapache2-mod-shib2.shibd.init
+	mkdir debian/tmp/usr/include/$(DEB_HOST_MULTIARCH)/shibsp
+	mv debian/tmp/usr/include/shibsp/paths.h \
+	    debian/tmp/usr/include/$(DEB_HOST_MULTIARCH)/shibsp/
 
 override_dh_install:
 	mkdir -p debian/tmp/usr/lib/apache2/modules
