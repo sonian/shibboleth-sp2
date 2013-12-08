@@ -78,7 +78,8 @@ shibauthorizer_OBJECTS = $(am_shibauthorizer_OBJECTS)
 am__DEPENDENCIES_1 =
 @BUILD_FASTCGI_TRUE@shibauthorizer_DEPENDENCIES =  \
 @BUILD_FASTCGI_TRUE@	$(am__DEPENDENCIES_1) \
-@BUILD_FASTCGI_TRUE@	$(top_builddir)/shibsp/libshibsp-lite.la
+@BUILD_FASTCGI_TRUE@	$(top_builddir)/shibsp/libshibsp-lite.la \
+@BUILD_FASTCGI_TRUE@	$(am__DEPENDENCIES_1)
 shibauthorizer_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CXXLD) \
 	$(shibauthorizer_CXXFLAGS) $(CXXFLAGS) \
@@ -89,7 +90,8 @@ am__shibresponder_SOURCES_DIST = shibresponder.cpp
 shibresponder_OBJECTS = $(am_shibresponder_OBJECTS)
 @BUILD_FASTCGI_TRUE@shibresponder_DEPENDENCIES =  \
 @BUILD_FASTCGI_TRUE@	$(am__DEPENDENCIES_1) \
-@BUILD_FASTCGI_TRUE@	$(top_builddir)/shibsp/libshibsp-lite.la
+@BUILD_FASTCGI_TRUE@	$(top_builddir)/shibsp/libshibsp-lite.la \
+@BUILD_FASTCGI_TRUE@	$(am__DEPENDENCIES_1)
 shibresponder_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(shibresponder_CXXFLAGS) \
 	$(CXXFLAGS) $(shibresponder_LDFLAGS) $(LDFLAGS) -o $@
@@ -307,13 +309,15 @@ AUTOMAKE_OPTIONS = foreign
 @BUILD_FASTCGI_TRUE@shibauthorizer_CXXFLAGS = $(FASTCGI_INCLUDE)
 @BUILD_FASTCGI_TRUE@shibauthorizer_LDFLAGS = $(FASTCGI_LDFLAGS)
 @BUILD_FASTCGI_TRUE@shibauthorizer_LDADD = $(FASTCGI_LIBS) \
-@BUILD_FASTCGI_TRUE@  $(top_builddir)/shibsp/libshibsp-lite.la
+@BUILD_FASTCGI_TRUE@  $(top_builddir)/shibsp/libshibsp-lite.la \
+@BUILD_FASTCGI_TRUE@  $(LITE_LIBS)
 
 @BUILD_FASTCGI_TRUE@shibresponder_SOURCES = shibresponder.cpp
 @BUILD_FASTCGI_TRUE@shibresponder_CXXFLAGS = $(FASTCGI_INCLUDE)
 @BUILD_FASTCGI_TRUE@shibresponder_LDFLAGS = $(FASTCGI_LDFLAGS)
 @BUILD_FASTCGI_TRUE@shibresponder_LDADD = $(FASTCGI_LIBS) \
-@BUILD_FASTCGI_TRUE@  $(top_builddir)/shibsp/libshibsp-lite.la
+@BUILD_FASTCGI_TRUE@  $(top_builddir)/shibsp/libshibsp-lite.la \
+@BUILD_FASTCGI_TRUE@  $(LITE_LIBS)
 
 EXTRA_DIST = \
     shibauthorizer.cpp \
