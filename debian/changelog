@@ -1,4 +1,4 @@
-shibboleth-sp2 (2.5.3+dfsg-1) UNRELEASED; urgency=low
+shibboleth-sp2 (2.5.3+dfsg-1) UNRELEASED; urgency=medium
 
   * New upstream release.
     - Fix server-side includes and directory indexes with Basic
