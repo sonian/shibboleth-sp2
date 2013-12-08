@@ -1351,6 +1351,7 @@ if test -n "$APXS24_CC" && test "$APXS24_CC" != "$CC" ; then
   echo "=================================================================="
 fi
 
-LIBTOOL="$LIBTOOL --silent"
+dnl Disabled on Debian since build log analysis wants verbose logs.
+dnl LIBTOOL="$LIBTOOL --silent"
 
 AC_OUTPUT
