@@ -1,4 +1,4 @@
-shibboleth-sp2 (2.5.2+dfsg-3) UNRELEASED; urgency=low
+shibboleth-sp2 (2.5.3+dfsg-1) UNRELEASED; urgency=low
 
   * Move /usr/include/shibsp/paths.h to the architecture-specific include
     directory, since it varies by architecture.  Thanks, Andreas
