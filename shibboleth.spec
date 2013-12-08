@@ -1,5 +1,5 @@
 Name:		shibboleth
-Version:	2.5.2
+Version:	2.5.3
 Release:	1
 Summary:	Open source system for attribute-based Web SSO
 Group:		Productivity/Networking/Security
