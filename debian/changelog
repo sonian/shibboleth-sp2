@@ -9,6 +9,7 @@ shibboleth-sp2 (2.5.3+dfsg-1) UNRELEASED; urgency=low
   * Move /usr/include/shibsp/paths.h to the architecture-specific include
     directory, since it varies by architecture.  Thanks, Andreas
     Beckmann.  (Closes: #720036)
+  * Update standards version to 3.9.5 (no changes required).
 
  -- Russ Allbery <rra@debian.org>  Sat, 17 Aug 2013 14:36:09 -0700
 
