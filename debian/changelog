@@ -1,5 +1,11 @@
 shibboleth-sp2 (2.5.3+dfsg-1) UNRELEASED; urgency=low
 
+  * New upstream release.
+    - Fix server-side includes and directory indexes with Basic
+      authentication when the Shibboleth module is loaded.
+    - Fix preserved POST data size limit enforcement.
+    - Fix POST data replay if a submit key is present.
+    - Fix support for idpHistoryProps in Sessions.
   * Move /usr/include/shibsp/paths.h to the architecture-specific include
     directory, since it varies by architecture.  Thanks, Andreas
     Beckmann.  (Closes: #720036)
