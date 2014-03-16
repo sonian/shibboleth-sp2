@@ -18,8 +18,8 @@ Vcs-Browser: http://anonscm.debian.org/gitweb/?p=pkg-shibboleth/shibboleth-sp2.g
 Package: libapache2-mod-shib2
 Section: httpd
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, adduser
-Recommends: openssl
+Depends: ${shlibs:Depends}, ${misc:Depends}, adduser,
+ shibboleth-sp2-utils (>= 2.5)
 Description: Federated web single sign-on system (Apache module)
  The Shibboleth System is a standards based software package for web
  single sign-on across or within organizational boundaries.  It supports
@@ -38,7 +38,8 @@ Architecture: any
 Multi-Arch: same
 Pre-Depends: ${misc:Pre-Depends}
 Depends: ${shlibs:Depends}, ${misc:Depends}, opensaml2-schemas (>= 2.5),
- shibboleth-sp2-schemas (>= 2.5), xmltooling-schemas (>= 1.5)
+ shibboleth-sp2-common (>= 2.5), shibboleth-sp2-schemas (>= 2.5),
+ xmltooling-schemas (>= 1.5)
 Description: Federated web single sign-on system (runtime)
  The Shibboleth System is a standards based software package for web
  single sign-on across or within organizational boundaries.  It supports
@@ -82,6 +83,21 @@ Description: Federated web single sign-on system (API docs)
  .
  This package contains the Shibboleth SP library API documentation.
 
+Package: shibboleth-sp2-common
+Section: libs
+Architecture: all
+Multi-Arch: foreign
+Description: Federated web single sign-on system (common files)
+ The Shibboleth System is a standards based software package for web
+ single sign-on across or within organizational boundaries.  It supports
+ authorization and attribute exchange using the OASIS SAML 2.0 protocol.
+ Shibboleth allows sites to make informed authorization decisions for
+ individual access of protected online resources while allowing users to
+ establish their identities with their local authentication systems.
+ .
+ This package contains common files used by the Shibboleth SP library,
+ Apache module, and daemon, primarily configuration files.
+
 Package: shibboleth-sp2-schemas
 Section: text
 Architecture: all
@@ -96,3 +112,23 @@ Description: Federated web single sign-on system (schemas)
  establish their identities with their local authentication systems.
  .
  This package contains the additional schemas used by the Shibboleth SP.
+
+Package: shibboleth-sp2-utils
+Section: web
+Architecture: any
+Multi-Arch: foreign
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Recommends: openssl
+Description: Federated web single sign-on system (daemon and utilities)
+ The Shibboleth System is a standards based software package for web
+ single sign-on across or within organizational boundaries.  It supports
+ authorization and attribute exchange using the OASIS SAML 2.0 protocol.
+ Shibboleth allows sites to make informed authorization decisions for
+ individual access of protected online resources while allowing users to
+ establish their identities with their local authentication systems.
+ .
+ This package contains the daemon that handles attribute requests and
+ maintains session informtion for the SP.  It is used internally by the
+ Apache module (libapache2-mod-shib2), but may be useful independently in
+ some circumstances.  It also contains some other useful Shibboleth SP
+ utility programs.

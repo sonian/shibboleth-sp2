@@ -1,5 +1,2 @@
-usr/bin
-usr/sbin
-etc/shibboleth
 usr/lib/*/shibboleth
 usr/share/shibboleth

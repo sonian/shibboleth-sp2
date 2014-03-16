@@ -1,2 +1,2 @@
-debian/libapache2-mod-shib2.shibd.init
+debian/shibboleth-sp2-utils.shibd.init
 shibsp/paths.h

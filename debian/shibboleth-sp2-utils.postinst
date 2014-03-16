@@ -5,7 +5,7 @@ set -e
 # Add a user as which to run the shibd daemon.
 if [ "$1" = "configure" ] ; then
     if ! getent passwd _shibd > /dev/null ; then
-        echo 'Adding system-user for Shibboleth daemon' 1>&2
+        echo 'Adding system user for Shibboleth daemon' 1>&2
         adduser --system --group --quiet --home /var/log/shibboleth \
             --no-create-home --disabled-login --force-badname _shibd
     fi
