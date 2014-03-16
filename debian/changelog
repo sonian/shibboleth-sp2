@@ -21,6 +21,9 @@ shibboleth-sp2 (2.5.3+dfsg-1) UNRELEASED; urgency=medium
     against this approach since this file is apparently not just a
     straight copy of jQuery.
   * Remove the now-unnecessary dh_builddeb override to use xz compression.
+  * Remove unnecessary dh_installinit parameters.  update-rc.d now uses
+    LSB headers exclusively and no longer pays attention to any runlevel
+    information on the command line.
   * Update standards version to 3.9.5 (no changes required).
 
  -- Russ Allbery <rra@debian.org>  Sat, 17 Aug 2013 14:36:09 -0700

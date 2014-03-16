@@ -98,7 +98,7 @@ override_dh_installdocs:
 	dh_installdocs -A doc/NOTICE.txt
 
 override_dh_installinit:
-	dh_installinit --name=shibd -- start 20 2 3 4 5 .
+	dh_installinit --name=shibd
 
 override_dh_makeshlibs:
 	dh_makeshlibs -Xusr/lib/$(DEB_HOST_MULTIARCH)/shibboleth
