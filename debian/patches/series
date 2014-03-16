@@ -1,0 +1,6 @@
+0001-Improve-shibd-init-script.patch
+0002-keygen-improvements-for-Debian.patch
+0003-Avoid-libtool-silent-flag.patch
+0004-Shire-log-path-for-Debian.patch
+0005-Default-native-logger-to-syslog.patch
+0006-Remove-WSTrust-schema-references.patch

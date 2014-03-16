@@ -1,0 +1,23 @@
+From: Russ Allbery <rra@debian.org>
+Date: Sun, 16 Mar 2014 16:34:45 -0700
+Subject: Shire log path for Debian
+
+Change the Apache module log path to /var/log/apache2, used on
+Debian, from the Red Hat /var/log/httpd.
+---
+ configs/Makefile.am | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/configs/Makefile.am b/configs/Makefile.am
+index ee90def..841f9de 100644
+--- a/configs/Makefile.am
++++ b/configs/Makefile.am
+@@ -4,7 +4,7 @@ AUTOMAKE_OPTIONS = foreign
+ 
+ pkglibdir = ${libdir}/@PACKAGE_NAME@
+ pkglogdir = ${localstatedir}/log/@PACKAGE_NAME@
+-shirelogdir = ${localstatedir}/log/httpd
++shirelogdir = ${localstatedir}/log/apache2
+ pkgxmldir = $(datadir)/xml/@PACKAGE_NAME@
+ pkgwebdir = $(datadir)/@PACKAGE_NAME@
+ pkgrundir = $(localstatedir)/run/@PACKAGE_NAME@

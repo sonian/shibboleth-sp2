@@ -1,0 +1,38 @@
+From: Russ Allbery <rra@debian.org>
+Date: Sun, 16 Mar 2014 16:41:25 -0700
+Subject: Remove WSTrust schema references
+
+The WSTrust schema is under a non-DFSG license and therefore isn't
+installed in the Debian package or included in the source package.
+Remove the references to it in the build system and schema catalog.
+---
+ schemas/Makefile.am    | 3 +--
+ schemas/catalog.xml.in | 2 ++
+ 2 files changed, 3 insertions(+), 2 deletions(-)
+
+diff --git a/schemas/Makefile.am b/schemas/Makefile.am
+index f8c246f..4ed2cd8 100644
+--- a/schemas/Makefile.am
++++ b/schemas/Makefile.am
+@@ -13,8 +13,7 @@ schemafiles = \
+     shibboleth-2.0-afp.xsd \
+     shibboleth-2.0-afp-mf-basic.xsd \
+     shibboleth-2.0-afp-mf-saml.xsd \
+-    shibboleth-2.0-attribute-map.xsd \
+-    WS-Trust.xsd
++    shibboleth-2.0-attribute-map.xsd
+ 
+ pkgxml_DATA = \
+ 	catalog.xml \
+diff --git a/schemas/catalog.xml.in b/schemas/catalog.xml.in
+index ca7c797..fbb3fe3 100644
+--- a/schemas/catalog.xml.in
++++ b/schemas/catalog.xml.in
+@@ -9,5 +9,7 @@
+     <system systemId="urn:mace:shibboleth:2.0:afp:mf:saml" uri="@-PKGXMLDIR-@/shibboleth-2.0-afp-mf-saml.xsd"/>
+     <system systemId="urn:mace:shibboleth:2.0:attribute-map" uri="@-PKGXMLDIR-@/shibboleth-2.0-attribute-map.xsd"/>
+     <system systemId="urn:mace:shibboleth:1.0" uri="@-PKGXMLDIR-@/shibboleth.xsd"/>
++  <!-- WS-Trust.xsd has been removed from the Debian package because of license problems
+     <system systemId="http://schemas.xmlsoap.org/ws/2005/02/trust" uri="@-PKGXMLDIR-@/WS-Trust.xsd"/>
++   -->
+ </catalog>

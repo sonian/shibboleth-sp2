@@ -1,0 +1,24 @@
+From: Russ Allbery <rra@debian.org>
+Date: Sun, 16 Mar 2014 16:30:53 -0700
+Subject: Avoid libtool --silent flag
+
+For Debian builds, we want to see all the compiler flags so that
+build log analysis has all available data.  Disable adding --silent
+to the libtool flags in configure.ac.
+---
+ configure.ac | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/configure.ac b/configure.ac
+index 6c71412..2e17582 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -1351,6 +1351,7 @@ if test -n "$APXS24_CC" && test "$APXS24_CC" != "$CC" ; then
+   echo "=================================================================="
+ fi
+ 
+-LIBTOOL="$LIBTOOL --silent"
++dnl Disabled on Debian since build log analysis wants verbose logs.
++dnl LIBTOOL="$LIBTOOL --silent"
+ 
+ AC_OUTPUT

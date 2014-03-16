@@ -1,0 +1,69 @@
+From: Russ Allbery <rra@debian.org>
+Date: Sun, 16 Mar 2014 16:35:39 -0700
+Subject: Default native logger to syslog
+
+Rather than generating a separate log in /var/log/apache2 by
+default, which needs permissions and rotation management, default
+the native.logger configuration to using syslog.
+---
+ configs/native.logger.in | 44 ++++++++++++++++++++++++++++++--------------
+ 1 file changed, 30 insertions(+), 14 deletions(-)
+
+diff --git a/configs/native.logger.in b/configs/native.logger.in
+index 52a90ae..5785d7e 100644
+--- a/configs/native.logger.in
++++ b/configs/native.logger.in
+@@ -1,5 +1,9 @@
+ # set overall behavior
+-log4j.rootCategory=INFO, native_log, warn_log
++#
++# Debian: remove warn_log.  All logs go to syslog, so there's no need to
++# have multiple log destinations differentiated only by log threshold.
++#log4j.rootCategory=INFO, native_log, warn_log
++log4j.rootCategory=INFO, native_log
+ 
+ # fairly verbose for DEBUG, so generally leave at INFO
+ log4j.category.XMLTooling.XMLObject=INFO
+@@ -27,17 +31,29 @@ log4j.category.XMLTooling.libcurl=INFO
+ 
+ # define the appender
+ 
+-log4j.appender.native_log=org.apache.log4j.RollingFileAppender
+-log4j.appender.native_log.fileName=@-SHIRELOGDIR-@/native.log
+-log4j.appender.native_log.maxFileSize=1000000
+-log4j.appender.native_log.maxBackupIndex=10
+-log4j.appender.native_log.layout=org.apache.log4j.PatternLayout
+-log4j.appender.native_log.layout.ConversionPattern=%d{%Y-%m-%d %H:%M:%S} %p %c %x: %m%n
++# This is the default, but it's essentially useless under normal
++# circumstances since Apache doesn't have access to write to that
++# directory.
++#log4j.appender.native_log=org.apache.log4j.RollingFileAppender
++#log4j.appender.native_log.fileName=@-SHIRELOGDIR-@/native.log
++#log4j.appender.native_log.maxFileSize=1000000
++#log4j.appender.native_log.maxBackupIndex=10
++#log4j.appender.native_log.layout=org.apache.log4j.PatternLayout
++#log4j.appender.native_log.layout.ConversionPattern=%d{%Y-%m-%d %H:%M:%S} %p %c %x: %m%n
++#log4j.appender.warn_log=org.apache.log4j.RollingFileAppender
++#log4j.appender.warn_log.fileName=@-SHIRELOGDIR-@/native_warn.log
++#log4j.appender.warn_log.maxFileSize=1000000
++#log4j.appender.warn_log.maxBackupIndex=10
++#log4j.appender.warn_log.layout=org.apache.log4j.PatternLayout
++#log4j.appender.warn_log.layout.ConversionPattern=%d{%Y-%m-%d %H:%M:%S} %p %c %x: %m%n
++#log4j.appender.warn_log.threshold=WARN
+ 
+-log4j.appender.warn_log=org.apache.log4j.RollingFileAppender
+-log4j.appender.warn_log.fileName=@-SHIRELOGDIR-@/native_warn.log
+-log4j.appender.warn_log.maxFileSize=1000000
+-log4j.appender.warn_log.maxBackupIndex=10
+-log4j.appender.warn_log.layout=org.apache.log4j.PatternLayout
+-log4j.appender.warn_log.layout.ConversionPattern=%d{%Y-%m-%d %H:%M:%S} %p %c %x: %m%n
+-log4j.appender.warn_log.threshold=WARN
++# Use syslog instead, since then at least the messages will go somewhere.
++# That facility is LOG_DAEMON, since log4cpp apparently doesn't recognize
++# symbolic log facilities.
++#
++# This is a Debian-specific change.
++log4j.appender.native_log=org.apache.log4j.LocalSyslogAppender
++log4j.appender.native_log.syslogName=shibboleth-sp
++log4j.appender.native_log.facility=3
++log4j.appender.native_log.layout=org.apache.log4j.BasicLayout

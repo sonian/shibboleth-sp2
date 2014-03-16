@@ -1,0 +1,39 @@
+From: Russ Allbery <rra@debian.org>
+Date: Sun, 16 Mar 2014 16:26:18 -0700
+Subject: keygen improvements for Debian
+
+Generate the key owned by _shibd to work with the Debian user
+configuration for the shibd daemon.  Pass --fqdn to the hostname
+command when determining the default identity for better certificate
+names.
+---
+ configs/keygen.sh | 9 ++++++++-
+ 1 file changed, 8 insertions(+), 1 deletion(-)
+
+diff --git a/configs/keygen.sh b/configs/keygen.sh
+index 4ee69f6..7787b63 100755
+--- a/configs/keygen.sh
++++ b/configs/keygen.sh
+@@ -1,5 +1,11 @@
+ #! /bin/sh
+ 
++# Defaults added for Debian.  They can still be overridden by command-line
++# options.
++OUT=/etc/shibboleth
++USER=_shibd
++GROUP=_shibd
++
+ while getopts h:u:g:o:e:y:bf c
+      do
+          case $c in
+@@ -32,8 +38,9 @@ if  [ -s $OUT/sp-key.pem -o -s $OUT/sp-cert.pem ] ; then
+     exit 0
+ fi
+ 
++# --fqdn flag added for Debian to generate better names for certificates.
+ if [ -z "$FQDN" ] ; then
+-    FQDN=`hostname`
++    FQDN=`hostname --fqdn`
+ fi
+ 
+ if [ -z "$YEARS" ] ; then
