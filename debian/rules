@@ -96,11 +96,6 @@ override_dh_installchangelogs:
 
 override_dh_installdocs:
 	dh_installdocs -A doc/NOTICE.txt
-	set -e; if [ -d "$(DOCS)" ] ; then			\
-	    rm $(DOCS)/html/jquery.js ;				\
-	    ln -s /usr/share/javascript/jquery/jquery.min.js	\
-		$(DOCS)/html/jquery.js ;			\
-	fi
 
 override_dh_installinit:
 	dh_installinit --name=shibd -- start 20 2 3 4 5 .

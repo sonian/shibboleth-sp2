@@ -72,7 +72,7 @@ Package: libshibsp-doc
 Section: doc
 Architecture: all
 Multi-Arch: foreign
-Depends: ${misc:Depends}, libjs-jquery
+Depends: ${misc:Depends}
 Description: Federated web single sign-on system (API docs)
  The Shibboleth System is a standards based software package for web
  single sign-on across or within organizational boundaries.  It supports

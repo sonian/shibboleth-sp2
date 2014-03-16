@@ -16,6 +16,10 @@ shibboleth-sp2 (2.5.3+dfsg-1) UNRELEASED; urgency=medium
     Beckmann.  (Closes: #720036)
   * Disable the forcing of --silent mode in Libtool since Debian build log
     analysis wants verbose logs.
+  * Stop symlinking the minimized jQuery installed by Doxygen and remove
+    the dependency on libjs-jquery.  The Doxygen maintainers recommend
+    against this approach since this file is apparently not just a
+    straight copy of jQuery.
   * Remove the now-unnecessary dh_builddeb override to use xz compression.
   * Update standards version to 3.9.5 (no changes required).
 
