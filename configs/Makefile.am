@@ -4,7 +4,7 @@ AUTOMAKE_OPTIONS = foreign
 
 pkglibdir = ${libdir}/@PACKAGE_NAME@
 pkglogdir = ${localstatedir}/log/@PACKAGE_NAME@
-shirelogdir = ${localstatedir}/log/apache2
+shirelogdir = ${localstatedir}/log/httpd
 pkgxmldir = $(datadir)/xml/@PACKAGE_NAME@
 pkgwebdir = $(datadir)/@PACKAGE_NAME@
 pkgrundir = $(localstatedir)/run/@PACKAGE_NAME@

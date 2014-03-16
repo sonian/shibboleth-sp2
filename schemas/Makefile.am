@@ -13,7 +13,8 @@ schemafiles = \
     shibboleth-2.0-afp.xsd \
     shibboleth-2.0-afp-mf-basic.xsd \
     shibboleth-2.0-afp-mf-saml.xsd \
-    shibboleth-2.0-attribute-map.xsd
+    shibboleth-2.0-attribute-map.xsd \
+    WS-Trust.xsd
 
 pkgxml_DATA = \
 	catalog.xml \

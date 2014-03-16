@@ -1,11 +1,5 @@
 #! /bin/sh
 
-# Defaults added for Debian.  They can still be overridden by command-line
-# options.
-OUT=/etc/shibboleth
-USER=_shibd
-GROUP=_shibd
-
 while getopts h:u:g:o:e:y:bf c
      do
          case $c in
@@ -38,9 +32,8 @@ if  [ -s $OUT/sp-key.pem -o -s $OUT/sp-cert.pem ] ; then
     exit 0
 fi
 
-# --fqdn flag added for Debian to generate better names for certificates.
 if [ -z "$FQDN" ] ; then
-    FQDN=`hostname --fqdn`
+    FQDN=`hostname`
 fi
 
 if [ -z "$YEARS" ] ; then
