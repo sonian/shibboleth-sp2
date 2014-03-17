@@ -114,7 +114,6 @@ Description: Federated web single sign-on system (schemas)
  This package contains the additional schemas used by the Shibboleth SP.
 
 Package: shibboleth-sp2-utils
-Section: web
 Architecture: any
 Multi-Arch: foreign
 Depends: ${shlibs:Depends}, ${misc:Depends}
