@@ -87,6 +87,7 @@ Package: shibboleth-sp2-common
 Section: libs
 Architecture: all
 Multi-Arch: foreign
+Depends: ${misc:Depends}
 Description: Federated web single sign-on system (common files)
  The Shibboleth System is a standards based software package for web
  single sign-on across or within organizational boundaries.  It supports
