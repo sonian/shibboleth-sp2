@@ -18,8 +18,7 @@ Vcs-Browser: http://anonscm.debian.org/gitweb/?p=pkg-shibboleth/shibboleth-sp2.g
 Package: libapache2-mod-shib2
 Section: httpd
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, adduser,
- shibboleth-sp2-utils (>= 2.5)
+Depends: ${shlibs:Depends}, ${misc:Depends}, shibboleth-sp2-utils (>= 2.5)
 Description: Federated web single sign-on system (Apache module)
  The Shibboleth System is a standards based software package for web
  single sign-on across or within organizational boundaries.  It supports
@@ -117,7 +116,7 @@ Description: Federated web single sign-on system (schemas)
 Package: shibboleth-sp2-utils
 Architecture: any
 Multi-Arch: foreign
-Depends: ${shlibs:Depends}, ${misc:Depends}
+Depends: ${shlibs:Depends}, ${misc:Depends}, adduser
 Recommends: openssl
 Description: Federated web single sign-on system (daemon and utilities)
  The Shibboleth System is a standards based software package for web
