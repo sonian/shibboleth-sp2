@@ -6,11 +6,16 @@ shibboleth-sp2 (2.5.3+dfsg-1) UNRELEASED; urgency=medium
     - Fix preserved POST data size limit enforcement.
     - Fix POST data replay if a submit key is present.
     - Fix support for idpHistoryProps in Sessions.
-  * Split shibboleth-sp2-common and shibboleth-sp2-utils packages off of
-    libapache2-mod-shib2.  shibboleth-sp2-common contains the
-    configuration, which is also required by the shared library.
-    shibboleth-sp2-utils contains the shibd daemon plus the other utility
-    commands that were in libapache2-mod-shib2.  (Closes: #740603)
+  * Split libshibsp-plugins, shibboleth-sp2-common, and
+    shibboleth-sp2-utils packages off of libapache2-mod-shib2, and merge
+    shibboleth-sp2-schemas with shibboleth-sp2-common.
+    shibboleth-sp2-schemas becomes a transitional package.
+    shibboleth-sp2-common contains the configuration, which is also
+    required by the shared library.  shibboleth-sp2-utils contains the
+    shibd daemon plus the other utility commands that were in
+    libapache2-mod-shib2.  libshibsp-plugins contains the library plugins
+    (which eventually should be installed in a per-SONAME path and then be
+    merged back with the library package).  (Closes: #740603)
   * Move /usr/include/shibsp/paths.h to the architecture-specific include
     directory, since it varies by architecture.  Thanks, Andreas
     Beckmann.  (Closes: #720036)

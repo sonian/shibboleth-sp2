@@ -18,7 +18,8 @@ Vcs-Browser: http://anonscm.debian.org/gitweb/?p=pkg-shibboleth/shibboleth-sp2.g
 Package: libapache2-mod-shib2
 Section: httpd
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, shibboleth-sp2-utils (>= 2.5)
+Depends: ${shlibs:Depends}, ${misc:Depends},
+ libshibsp-plugins (= ${binary:Version}), shibboleth-sp2-utils (>= 2.5)
 Description: Federated web single sign-on system (Apache module)
  The Shibboleth System is a standards based software package for web
  single sign-on across or within organizational boundaries.  It supports
@@ -37,8 +38,7 @@ Architecture: any
 Multi-Arch: same
 Pre-Depends: ${misc:Pre-Depends}
 Depends: ${shlibs:Depends}, ${misc:Depends}, opensaml2-schemas (>= 2.5),
- shibboleth-sp2-common (>= 2.5), shibboleth-sp2-schemas (>= 2.5),
- xmltooling-schemas (>= 1.5)
+ shibboleth-sp2-common (>= 2.5), xmltooling-schemas (>= 1.5)
 Description: Federated web single sign-on system (runtime)
  The Shibboleth System is a standards based software package for web
  single sign-on across or within organizational boundaries.  It supports
@@ -48,6 +48,21 @@ Description: Federated web single sign-on system (runtime)
  establish their identities with their local authentication systems.
  .
  This package contains the Shibboleth SP runtime library.
+
+Package: libshibsp-plugins
+Section: libs
+Architecture: any
+Multi-Arch: same
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Federated web single sign-on system (runtime)
+ The Shibboleth System is a standards based software package for web
+ single sign-on across or within organizational boundaries.  It supports
+ authorization and attribute exchange using the OASIS SAML 2.0 protocol.
+ Shibboleth allows sites to make informed authorization decisions for
+ individual access of protected online resources while allowing users to
+ establish their identities with their local authentication systems.
+ .
+ This package contains plugins for the Shibboleth SP library.
 
 Package: libshibsp-dev
 Section: libdevel
@@ -96,27 +111,30 @@ Description: Federated web single sign-on system (common files)
  establish their identities with their local authentication systems.
  .
  This package contains common files used by the Shibboleth SP library,
- Apache module, and daemon, primarily configuration files.
+ Apache module, and daemon, primarily configuration files and schemas.
 
 Package: shibboleth-sp2-schemas
-Section: text
+Section: oldlibs
 Architecture: all
 Multi-Arch: foreign
-Depends: ${misc:Depends}
-Description: Federated web single sign-on system (schemas)
+Depends: ${misc:Depends}, shibboleth-sp2-common
+Description: Federated web single sign-on system (transitional package)
+ This is a transitional package to smooth upgrades from earlier Shibboleth
+ versions.  The schemas are now provided by shibboleth-sp2-common.  This
+ package can be removed once the upgrade is complete.
+ .
  The Shibboleth System is a standards based software package for web
  single sign-on across or within organizational boundaries.  It supports
  authorization and attribute exchange using the OASIS SAML 2.0 protocol.
  Shibboleth allows sites to make informed authorization decisions for
  individual access of protected online resources while allowing users to
  establish their identities with their local authentication systems.
- .
- This package contains the additional schemas used by the Shibboleth SP.
 
 Package: shibboleth-sp2-utils
 Architecture: any
 Multi-Arch: foreign
-Depends: ${shlibs:Depends}, ${misc:Depends}, adduser
+Depends: ${shlibs:Depends}, ${misc:Depends}, adduser,
+ libshibsp-plugins (= ${binary:Version})
 Recommends: openssl
 Description: Federated web single sign-on system (daemon and utilities)
  The Shibboleth System is a standards based software package for web
@@ -130,4 +148,4 @@ Description: Federated web single sign-on system (daemon and utilities)
  maintains session informtion for the SP.  It is used internally by the
  Apache module (libapache2-mod-shib2), but may be useful independently in
  some circumstances.  It also contains some other useful Shibboleth SP
- utility programs.
+ utility programs and the FastCGI authorizer and responder.

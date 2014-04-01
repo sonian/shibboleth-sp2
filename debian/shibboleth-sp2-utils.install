@@ -1,2 +1,4 @@
 usr/bin
 usr/sbin
+usr/lib/*/shibboleth/shibauthorizer
+usr/lib/*/shibboleth/shibresponder
