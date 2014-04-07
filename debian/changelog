@@ -1,3 +1,11 @@
+shibboleth-sp2 (2.5.2+dfsg-2~bpo70+1) wheezy-backports; urgency=medium
+
+  * Backport to wheezy.
+  * Revert the changes to build against Apache 2.4 and use dh_apache2, but
+    keep the change to enable the module by default on new installs.
+
+ -- Russ Allbery <rra@debian.org>  Sun, 06 Apr 2014 18:23:31 -0700
+
 shibboleth-sp2 (2.5.2+dfsg-2) unstable; urgency=low
 
   * Upload to unstable.
