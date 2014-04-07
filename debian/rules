@@ -36,7 +36,7 @@ get-orig-source:
 	xz shibboleth-sp2_$(DEBVERS).orig.tar
 
 %:
-	dh $@ --with apache2,autoreconf
+	dh $@ --with autoreconf
 
 override_dh_autoreconf:
 	dh_autoreconf --as-needed
@@ -44,8 +44,8 @@ override_dh_autoreconf:
 override_dh_auto_configure:
 	dh_auto_configure --						\
 	    --libexecdir=/usr/lib/$(DEB_HOST_MULTIARCH)/shibboleth	\
-	    --localstatedir=/var --enable-apache-24			\
-	    --with-apxs24=/usr/bin/apxs2 --disable-dependency-tracking	\
+	    --localstatedir=/var --enable-apache-22			\
+	    --with-apxs2=/usr/bin/apxs2 --disable-dependency-tracking	\
 	    --with-memcached --with-fastcgi --with-gssapi $(SYSTEM)
 
 override_dh_auto_install:
@@ -64,35 +64,34 @@ override_dh_auto_install:
 	    debian/libapache2-mod-shib2.shibd.init
 
 override_dh_install:
-	mkdir -p debian/tmp/usr/lib/apache2/modules
-	mv debian/tmp/usr/lib/*/shibboleth/mod_shib_24.so \
-	    debian/tmp/usr/lib/apache2/modules/mod_shib2.so
-	pod2man debian/man-pages/mdquery.pod --section 1		\
-	    --center 'Shibboleth' --release $(VERSION)			\
+	mv debian/tmp/usr/lib/*/shibboleth/mod_shib_22.so \
+	    debian/libapache2-mod-shib2/usr/lib/apache2/modules
+	pod2man debian/man-pages/mdquery.pod --section 1 \
+	    --center 'Shibboleth' --release $(VERSION) \
 	    debian/libapache2-mod-shib2/usr/share/man/man1/mdquery.1
-	pod2man debian/man-pages/resolvertest.pod --section 1		  \
-	    --center 'Shibboleth' --release $(VERSION)			  \
+	pod2man debian/man-pages/resolvertest.pod --section 1 \
+	    --center 'Shibboleth' --release $(VERSION) \
 	    debian/libapache2-mod-shib2/usr/share/man/man1/resolvertest.1
-	pod2man debian/man-pages/shib-metagen.pod --section 1		  \
-	    --center 'Shibboleth' --release $(VERSION)			  \
+	pod2man debian/man-pages/shib-metagen.pod --section 1 \
+	    --center 'Shibboleth' --release $(VERSION) \
 	    debian/libapache2-mod-shib2/usr/share/man/man1/shib-metagen.1
-	pod2man debian/man-pages/shib-keygen.pod --section 8		 \
-	    --center 'Shibboleth' --release $(VERSION)			 \
+	pod2man debian/man-pages/shib-keygen.pod --section 8 \
+	    --center 'Shibboleth' --release $(VERSION) \
 	    debian/libapache2-mod-shib2/usr/share/man/man8/shib-keygen.8
-	pod2man debian/man-pages/shibd.pod --section 8			\
-	    --center 'Shibboleth' --release $(VERSION)			\
+	pod2man debian/man-pages/shibd.pod --section 8 \
+	    --center 'Shibboleth' --release $(VERSION) \
 	    debian/libapache2-mod-shib2/usr/share/man/man8/shibd.8
-	dh_install -s -i -X mod_shib2.so --fail-missing
+	dh_install -s -i --fail-missing
 
 override_dh_installchangelogs:
 	dh_installchangelogs doc/RELEASE.txt
 
 override_dh_installdocs:
 	dh_installdocs -A doc/NOTICE.txt
-	set -e; if [ -d "$(DOCS)" ] ; then			\
-	    rm $(DOCS)/html/jquery.js ;				\
-	    ln -s /usr/share/javascript/jquery/jquery.min.js	\
-		$(DOCS)/html/jquery.js ;			\
+	set -e; if [ -d "$(DOCS)" ] ; then \
+	    rm $(DOCS)/html/jquery.js ; \
+	    ln -s /usr/share/javascript/jquery/jquery.min.js \
+		$(DOCS)/html/jquery.js ; \
 	fi
 
 override_dh_installinit:

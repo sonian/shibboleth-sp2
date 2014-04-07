@@ -13,9 +13,7 @@ Introduction
 Installation and Configuration
 
   The following instructions assume use of the Apache 2.4 access
-  restriction syntax.  If you are still using the earlier Allow/Deny
-  directives, you may need to use "Allow from all" instead of or in
-  addition to "Require all granted".
+  restriction syntax.
 
   After installing this package, the module is enabled but not properly
   configured.  At least some manual configuration will be required before
@@ -34,7 +32,7 @@ Installation and Configuration
 
     <Location "/Shibboleth.sso">
         AuthType None
-        Require all granted
+        Allow from all
     </Location>
 
   The default error messages from Shibboleth are located in
@@ -48,7 +46,7 @@ Installation and Configuration
 
     <Location /shibboleth-sp>
         AuthType None
-        Require all granted
+        Allow from all
     </Location>
     Alias /shibboleth-sp/main.css /usr/share/shibboleth/main.css
 
@@ -154,4 +152,4 @@ Further Information
 
     https://wiki.shibboleth.net/confluence/display/SHIB2/NativeSPConfiguration
 
- -- Russ Allbery <rra@debian.org>, Tue, 18 Jun 2013 14:50:43 -0700
+ -- Russ Allbery <rra@debian.org>, Sun,  6 Apr 2014 18:13:30 -0700

@@ -3,3 +3,5 @@ usr/sbin
 etc/shibboleth
 usr/lib/*/shibboleth
 usr/share/shibboleth
+
+debian/shib2.load	etc/apache2/mods-available
